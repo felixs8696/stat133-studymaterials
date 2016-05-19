@@ -1,0 +1,101 @@
+---
+title: "Assignment 4"
+author: "Felix Su"
+date: "February 8, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw4/Assignment-Four-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+```{r}
+library(printr)
+```
+
+##Births Each Day
+
+1. New table DailyBirths
+```{r fig.width=5, fig.height=4}
+DailyBirths <- Birthdays %>%
+  group_by(date, wday) %>%
+  tally(births) %>%
+  rename(total = n)
+ggplot(DailyBirths, aes(x = date, y = total)) + geom_point(size = .5) + ggtitle("DailyBirths")
+```
+
+2. Seasonality of Birth Rates
+    1) Number of births **each week**
+    2) Number of births **each month**
+    3) Number of births each **Julian Day**
+```{r fig.width=5, fig.height=4}
+ggplot(DailyBirths, aes(x = week(date), y = total)) + geom_point(size = .5) + ggtitle("Number of Births Each Week")
+```
+    
+```{r fig.width=5, fig.height=4}
+ggplot(DailyBirths, aes(x = month(date), y = total)) + geom_point(size = .5) + ggtitle("Number of Births Each Month")
+```
+    
+```{r fig.width=5, fig.height=4}
+ggplot(DailyBirths, aes(x = yday(date), y = total)) + geom_point(size = .5) + ggtitle("Number of Births Each Julian Day") 
+```
+
+3. Number of births by **day of the week**
+```{r fig.width=5, fig.height=4}
+ggplot(DailyBirths, aes(x = wday, y = total)) + geom_point(size = .5) + ggtitle("Number of Births by Weekday")
+```
+
+4. MyTwoYears Data Table and Plot
+    + A clear pattern appears that shows most people born in the years 1980-1981 were born closer to the middle of the week.
+```{r fig.width=8, fig.height=4}
+MyTwoYears <- DailyBirths %>%
+    filter(year(date) >= 1980, year(date) <= 1981)
+ggplot(MyTwoYears, aes(x = date, y = total, color=wday)) + geom_point() + ggtitle("Births during 1980 and 1981 (MyTwoYears)")
+```
+
+##Births and Holidays
+
+5. Read in US Holidays Data
+```{r}
+Holidays <- read.csv("http://tiny.cc/dcf/US-Holidays.csv") %>% mutate(date = lubridate::dmy(date))
+```
+6. Add Holiday layers to plot 4
+    1. Add vertical bars to each holiday to the plot from 4
+```{r fig.width=8, fig.height=4}
+ggplot(MyTwoYears, aes(x = date, y = total)) + geom_point(aes(color=wday)) + geom_vline(data = Holidays, aes(xintercept = as.numeric(date), color = as.factor(wday(date, label=TRUE)))) + ggtitle("MyTwoYears with Holidays Marked by VLines")
+```
+    
+    2. Add Holiday text labels
+```{r fig.width=8, fig.height=4}
+myHolidays <- Holidays %>% filter(year(date) >= 1980, year(date) <= 1981)
+ggplot(MyTwoYears, aes(x = date, y = total)) + geom_point(aes(color=wday)) + geom_vline(data = Holidays, aes(xintercept = as.numeric(date), color = as.factor(wday(date, label=TRUE)))) + geom_text(data = myHolidays, aes(x = date, y = 9000, label = holiday, angle = 80)) + ggtitle("MyTwoYears with Holidays Labeled")
+```
+
+7. Join MyTwoYears with Holidays
+```{r}
+MyTwoYears <- MyTwoYears %>%
+    select(date, wday, total) %>%
+    left_join(Holidays %>% select(date, holiday), by=c("date"="date"))
+head(MyTwoYears)
+```
+
+8. Mutate MyTwoYears holidays to Yes or No
+```{r}
+MyTwoYears <- MyTwoYears %>%
+    mutate(is_holiday = ifelse(is.na(holiday), "no", "yes"))
+head(MyTwoYears)
+```
+
+9. Set MyTwoYears glyph size to correspond to is_holiday. Check hypothesis.
+    + Yes, the hypothesis from (5) holds because the plot shows that weekdays that fall on holidays tend to have less births than weekdays that are not during holidays
+```{r fig.width=8, fig.height=4}
+ggplot(MyTwoYears, aes(x = date, y = total, color=wday, size = is_holiday)) + geom_point() + ggtitle("MyTwoYears with Holidays Marked by Size")
+```

@@ -1,0 +1,59 @@
+---
+title: "Lab 4"
+author: "Felix Su"
+date: "February 12, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab4/Lab-4-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+1. Developing Plan for Wrangling
+    * Variables:
+        + name, sex, count, year
+    * Case: Number of a specific baby name given during a specific year
+
+2. Sketch out the idea
+    * x = year
+    * y = count renamed as popularity
+    * group by name
+
+3. Glyph Ready Data Table
+    * Glyph-Ready Data Fram contains name, count as popularity, and year ordered by year
+        + sex does not appear at all in the graph
+        + Popularity is similar to count, but is renamed
+        
+4. Cases in Glyph-ready vs. raw input
+    * Cases Abraham, Franklin, and Woodrow have been filtered out as the focus for the plot
+    * Cases have not been grouped or summarized in any way
+    * Yes, there is a new variable popularity, but we don't know the transformation ratio, so we use count instead.
+
+5. Sequence of steps that will accomplish wrangling
+    *
+6. Translate design into R
+```{r}
+MyBabyNames <- BabyNames %>%
+    select(name, count, year) %>%
+    group_by(name, year) %>%
+    summarise(popularity = sum(count)) %>%
+    filter(name %in% c("Abraham", "Franklin", "Woodrow"))
+MyBabyNames %>% head()
+```
+
+7. Use ggplot to graph the data
+```{r fig.width=6, fig.height = 4}
+MyBabyNames %>%
+  ggplot(aes(x=year, y=popularity, group = name)) +
+  geom_line(size = 1, alpha = .5, aes(color = name)) + ylab("Popularity") + xlab("Year")
+```

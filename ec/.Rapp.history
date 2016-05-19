@@ -1,0 +1,10 @@
+BabyNames
+Rstudio
+editR
+editR()
+if (!require("devtools")) install.packages("devtools")#
+devtools::install_github("trestletech/shinyAce")#
+devtools::install_github("swarm-lab/editR")#
+#
+library(editR)
+editR("/Users/felixsu/ucb_classes/Sp16/STAT133/ec/mid_review_prob.Rmd")

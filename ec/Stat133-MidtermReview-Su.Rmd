@@ -1,0 +1,105 @@
+---
+title: "STAT 133 Midterm Review Sheet"
+author: "Felix Su"
+date: "February 29, 2018"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/ec/Stat133-MidtermReview-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+##Master Function List
+```{r, echo=FALSE}
+Functions <- 
+  c("install.packages(pkg)", 
+    "library(pkg)",
+    "data(df, package = name)",
+    "data.frame(vec1,vec2,...,stringsAsFactors = FALSE)",
+    "subset(df, subset= condition)",
+    "list(x,y,z)",
+    "names(my_list) <- c('data_frame', 'num', 'vec')",
+    "unique",
+    "n_distinct")
+# filter, tally, select, scale_y_continuous, lab, theme, ggplot, n_distinct,unique, rep, %in%, unlist, strsplit, gather, spread, mutate, transform,
+Purpose <- 
+  c("installs R package",
+    "load package into RStudio",
+    "reads data table into R",
+    "creates a data fram from multiple vectors as cols",
+    "returns subset of dataframe",
+    "creates list from any elems",
+    "Add names to corresponding list item",
+    "returns vector with duplicates removed",
+    "length(unique(x))")
+function_table <- data.frame(Functions, Purpose)
+function_table
+```
+
+##Lecture 3
+
+###Chaining Syntax
+```{r, eval = FALSE}
+Object_Name <- 
+  Data_Table %>%
+    function_name(arguments) %>%
+    function_name(arguments) 
+```
+* Example
+```{r}
+data("BabyNames",package="DataComputing")
+Princes <- 
+  BabyNames %>%
+  filter(name=="Prince") %>%
+  group_by(year,sex) %>%
+  summarise(sum(count))
+head(Princes)
+```
+
+###Data Frame Construction
+```{r, eval = FALSE}
+a <- c(10,30,15)
+b <- c("Bob","John","Ben")
+df <- data.frame(a,b, stringsAsFactors = FALSE)
+names(df) <- c("age","friend")
+df[1,2] #first case, second variable
+df[,1] #returns vector correponding to first variable
+df[2:3,2] OR df[2:3,"friend"] #returns second and third case of the friend variable as a new array
+df[-1,"friend"] #removes the second element of the friends vector and returns a new vector
+```
+
+###List
+* A set of any R objects or primitive values
+```{r}
+x <- df
+y <- 7
+z <- c(1,2)
+my_list <- list(x,y,z)
+names(my_list) <- c("data_frame", "num", "vec")
+my_list
+```
+
+-----------
+###Statistic vs Case
+* Case: individual cases
+* Statistic: cases taken collectively
+
+###Review Functions
+```{r}
+# n_distinct() - returns the length of a vector with duplicates removed
+BabyNames %>% 
+  group_by(name) %>%
+  summarise(year_count = n_distinct(year)) %>%
+  filter(year_count >= 120) %>% 
+  head(2)
+```

@@ -1,0 +1,57 @@
+Chapter 1
+Problem 1.1
+(a) Taffy = categorical
+(b) year = quantitative
+(c) sex = categorical
+(d) name = Value of a variable for a particular case
+(e) count = quantitative
+
+Problem 1.2
+
+Not Tidy because variables do not each have the same sort of value recorded for each row
+“Lincoln, Abraham" should be “Abraham Lincoln”
+“1837 to 1941” should be “1837-1841” (actually probably better to have start and end columns)
+“it depends” should split the case into multiple rows with concrete values for state number
+Problem 1.3
+
+President	Start_Term	End_Term	State_Number
+Abraham Lincoln	1861	1862	32
+Abraham Lincoln	1862	1864	22
+Abraham Lincoln	1864	1865	23
+Abraham Lincoln	1865	1865	24
+George Washington	1791	1799	16
+Martin Van Buren	1837	1841	26
+Note: answers may vary for Lincoln because states entered and seceded from the union during the Civil War, and opinion differ on secession
+These numbers exclude seceded states
+Source: https://answers.yahoo.com/question/index?qid=20070308184911AA8Vkye
+(Might also be good idea to split the First and Last names for data processing reasons)
+
+Problem 1.4
+
+Table A Variables: Year, Algeria, Brazil, Columbia
+Table B Variables: Country, Y2000, Y2001
+Table C Variables: Country, Year, Value
+Table A Case: A year
+Table B Case: A country
+Table C Case: A country in a year
+
+
+Chapter 2
+Problem 2.2
+
+file name and name of an argument in a named argument should be surrounded by quotations
+
+Problem 2.3
+
+CPS = Current Population Survey
+Problem 2.6
+
+essay14 = Legit
+first-essay = Legit
+"MyData" = Not Legit - Quotations denote String, not Object
+third_essay = Legit
+small sample = Not Legit - can’t have spaces in Object names
+functionList = Legit
+FuNcTiOnLiSt = Legit
+.MyData. = Legit
+sqrt() = Not Legit - indicates a command

@@ -1,0 +1,94 @@
+---
+title: "Assignment 9"
+author: "Felix Su"
+date: "March 31, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(rvest)
+library(lubridate)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw9/Assignment-9-Su.Rmd")
+```
+
+```{r}
+page <- "http://en.wikipedia.org/wiki/List_of_nuclear_reactors"
+xpath <- '//*[@id="mw-content-text"]/table' 
+table_list <- page %>%
+  read_html() %>%
+  html_nodes(xpath = xpath) %>%
+  html_table(fill = TRUE)
+```
+
+## Data Scraping
+```{r}
+table = table_list[[23]]
+new_names <- c("Name", "No.", "Type", "Model", "Status", "Net_Capacity", "Gross_Capacity", "Start", "Operation_Date", "Closure")
+names(table) <- new_names
+table <- table %>%
+  filter(row_number() != 1) %>%
+  mutate(indiv_name=paste(Name, No.))
+```
+
+## A Quick Visualization
+```{r fig.height=5, fig.width=6}
+ggplot(table, aes(x=dmy(Start), y=Net_Capacity)) +
+  geom_point(aes(col=Type)) + labs(x="Construction start", y="Net")
+```
+
+## Construction delays
+```{r fig.height=7, fig.width=7}
+ggplot(table, aes(x=dmy(Start), y=indiv_name)) +
+  geom_segment(aes(xend=dmy(Operation_Date), yend=indiv_name)) + 
+  labs(x="Construction Start", y="Reactor Site")
+```
+
+#Part 2
+```{r eval=FALSE}
+#1
+mkdir lifespan # local machine
+cd lifespan # local machine
+#2
+mv ~/Desktop/lifeexpectancy.csv . # local machine
+mv ~/Desktop/makemaps.R . # local machine
+cp /vagrant/lifeexpectancy.csv ~/lifespan/. # virtual machine
+cp /vagrant/makemaps.R ~/lifespan/. # virtual machine
+##### All following done on virtual machine #####
+#3
+less lifeexpectancy.csv
+#4
+wc -l lifeexpectancy.csv #250 total lines
+#Subtract 1 to get 249 total countries
+#5
+head -1 lifeexpectancy.csv #years 1950, 1975, 2000 = cols 152, 177, 202 respoectively
+#6
+cat lifeexpectancy.csv | cut -f 1,152,177,202 -d ","
+#7
+cat lifeexpectancy.csv | cut -f 1,152,177,202 -d "," | egrep [0-9] >> lifeexpectancy.clean.csv
+#8
+install.packages('maps', repos='http://cran.us.r-project.org') # in R
+install.packages('fields', repos='http://cran.us.r-project.org') # in R
+nice R CMD BATCH makemaps.R plots.Rout &
+cp -r plots /vagrant/. # to look at plots on local machine
+```
+
+##Extra Credit
+1. What is the primary plot type that Rosling uses in the video?
+    * Scatterplot
+
+2. We could create something similar in R by first making a series of plots in separate files and then stringing them together to make an animation. The UNIX function convert can do this, as can the commercial software Quicktime Pro. If we wanted to do this, what additional data would we need, beyond what you used in this assignment?
+    * You would need to know when to show each plot in the series, either a timeline or an interval function to display each picture.
+    
+3. Name three other techniques that Rosling uses to enhance his plots. Which of them do you think you could do in R?
+    * Splitting glyphs
+    * Glowing glyphs
+    * Labeling Glyphs
+    * In R you can always label glyphs and you can probably make glowing glyphs by choosing the right accenting colors and some join and factor, but Splitting glyphs is probably out of scope

@@ -1,0 +1,5 @@
+unnamed-chunk-1	library
+unnamed-chunk-2	includeSourceDocuments
+unnamed-chunk-3	%>%	==	BabyNames	count	desc	filter	group_by	mutate	name	rank	sum	summarise	tot
+unnamed-chunk-4	%>%	==	activity	duration	filter	group_by	jersey	sum	summarise	WorkoutLog
+unnamed-chunk-5	%>%	==	BabyNames	count	data	filter	group_by	head	name	sex	sum	summarise	year

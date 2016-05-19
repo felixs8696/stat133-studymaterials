@@ -1,0 +1,108 @@
+---
+title: "Lab 7"
+author: "Felix Su"
+date: "Mar 4, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab7/Lab7-MidtermReview-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+
+##Question 1
+```{r}
+# built-in dataset in R
+head(airquality)
+```
+Change data from wide to narrow format (above) using gather function. Group Ozone, Solar.R, Wind, Temp into one variable called `type` and create another column called `value` to store their values:
+```{r}
+nar_aq <- airquality %>%
+    gather(key = type, value = value, Ozone, Solar.R, Wind, Temp)
+head(nar_aq)
+```
+
+##Question 2
+Suppose you have a data frame, `data`, as given below:
+```{r data, echo = F}
+# Data frame for questions
+data <- data.frame(V1 = rep(c("a","b","c"), each = 2),
+                   V2 = rep(c(1:2), times = 3),
+                   V3 = rep(c("alpha", "beta", "gamma")),
+                   V4 = seq(10, 60, by = 10))
+print(data)
+```
+Assuming that the tidyr and dplyr libraries are already loaded, write down what the output for the following code:
+```{r, eval = FALSE}
+data %>%
+  filter(V1 == "a") %>% # Step 1
+  select(V2, V4) %>% # Step 2
+  gather(key = Apple, value = Banana, V2, V4) %>% # Step 3
+  mutate(Apple = Banana) # Step 4
+```
+
+Step 1: Selects only the cases(rows) of the data table `data` that have a V1 value of "a"
+
+Step 2: Selects only the columns of `data` corresponding to variables V2 and V4
+
+Step 3: Gathers the V2 and V4 columns into a single variable column named "Apple", then store the values that were originally in V2 and V4 into its corresponding position in variable column called "Banana".
+
+Step 4: Replace all values in the new column "Apple"" with its coreesponding values of the same case in column "Banana"
+
+##Question 3
+Suppose you have a data frame, data, as given below.
+```{r data2, echo = F}
+set.seed(1014)
+data <- data.frame(replicate(6, sample(c(1:10, -99), 6, rep = TRUE)))
+names(data) <- letters[1:6]
+data
+```
+a. Write a function called `fix_missing_99` that takes one argument: `x`, a numeric vector. The function should replace every component of x equal to -99 with NA.
+```{r}
+fix_missing_99 <- function(x) {
+  for(i in 1:length(x)) {
+    if(x[i] == -99) {
+      x[i] = NA
+    }
+  }
+  return(x)
+}
+```
+b. Write a loop that replaces every -99 in data with NA. For full credit, your code must use the function in part (a) and it should continue to work without modification if additional columns are added to the data frame.
+```{r}
+replace_99 <- function(data) {
+  for(i in 1:length(data)) {
+    data[[i]] = fix_missing_99(data[[i]])
+  }
+  return(data)
+}
+```
+c. Write down an appropriate call from the apply family of functionals to perform the same task as in part (b).
+```{r}
+data %>% vapply(fix_missing_99, numeric(nrow(data)))
+```
+
+##Question 4
+Assuming the ‘ggplot2’ is already loaded. The first 6 rows of the ‘diamonds’ dataset are:
+```{r}
+head(diamonds, 6)
+```
+What command in ‘ggplot’ will you use to generate the graph given below? 
+```{r echo=FALSE,fig.height=3,fig.width=6}
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(color = cut)) +
+  geom_smooth(se=FALSE) +
+  facet_wrap(~ cut)
+```

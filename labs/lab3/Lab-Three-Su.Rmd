@@ -1,0 +1,121 @@
+---
+title: "STAT 133 Lab 3"
+author: "Felix Su"
+date: "Feb 5, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab3/Lab-Three-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+
+###Part 1 Frames, Glyphs, and other Components of Graphics (Chapter 6)
+Look at the left hand graph called Losers and Winners in the following article: Losers and Winners. I am not asking about the right side graph with the circles only the left hand graph with the lines.
+
+Answer these questions:
+
+  * What glyphs are used?
+      + Lines connecting dots with end points as 1971 and 2011
+  * What are the aesthetics for those glyphs?
+      + x position
+      + y position
+      + labels
+  * Which variable is mapped to each aesthetic?
+      + x position: left endpoint at 1971 and right end point at 2011
+      + y position: % of annual family income
+  * Which variable, if any, is used for faceting?
+      + None, no new graphs are created from facets
+  * What are the scales?
+      + labels
+      + 1971 and 2011 endpoints
+      + Lines that indicate 0% and 100% of family income
+  * What variables make up the frame:
+      + x variable: year
+      + y variable: % of annual family income
+  * What are the guides?
+      + labels
+      + 1971 and 2011 endpoints
+      + Lines that indicate 0% and 100% of family income
+  * Write down what the glyph-ready dataframe looks like
+      + Wealth quantiles ordered from 1-5 (Poorest to Wealthiest)
+      + cost - percent of annual income paid to four year public university
+      + year - year of data taken
+```
+wealth  cost  year
+(int) (int) (int)
+      1    42   1971
+      1   114   2011
+      2    19   1971
+      2    46   2011
+      3    13   1971
+      3    29   2011
+      4    10   1971
+      4    19   2011
+      5     6   1971
+      5     9   2011
+```
+    
+##Part 2 Data Wrangling (chapter 7)
+Here is a small data table, called flights1, based on flights in the nycflights13 package. Take this table as input. If you would like to play with this data table make sure you have nycflights13 installed on your computer (i.e. install.packages("nycflights13")).
+```{r}
+library(nycflights13)
+flights1 <-flights %>%
+  select( carrier, distance, dep_delay, origin) %>%
+  head(10)
+flights1
+```
+
+Output A Code:
+
+* Variables: distance
+* Operation: arrange()
+```{r}
+flights1 %>%
+  arrange(desc(distance))
+```
+
+Output B Code:
+
+* Variables: carrier
+* Operation: filter()
+```{r}
+flights1 %>%
+  filter(carrier=="UA")
+```
+
+Output C Code:
+
+* Variables: carrier, distance
+* Operation: filter()
+```{r}
+flights1 %>%
+  filter(carrier=="UA", distance>1000)
+```
+
+Output D Code:
+
+* Variables: dep_delay
+* Operation: summarise()
+```{r}
+flights1 %>%
+  summarise(total = mean(dep_delay))
+```
+
+Output E Code:
+
+* Variables: carrier, distance
+* Operation: select()
+```{r}
+flights1 %>%
+  select(carrier, distance)
+```

@@ -1,0 +1,188 @@
+---
+title: "Lab 8: Practice Midterm Questions"
+author: "Felix Su"
+date: "March 11, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab8/Lab-8-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+
+###1. The following loop can be done as a vectorized calculation. What is the equivalent vectorized calculation?
+```{r, eval=FALSE}
+vec = 1:50
+i = 1
+
+while(i < 50) {
+  vec[i] <- i^2
+  i <- i + 1
+}
+```
+####Answer:
+```{r}
+vec = 1:50
+i = 1
+vec <- sapply(vec, function(i) i^2)
+vec
+```
+
+###2. Write down what the vector x will contain after each line of R code, if they are executed sequentially.
+####  a. x = [0, 2, 4, 6, 8]
+```{r, eval = FALSE}
+x <- seq(from = 0, to = 8, by = 2) #creates a sequence of even numbers from 0 to 8 inclusive
+```
+####  b. x = [NA, NA, 4, 6, 8]
+```{r, eval = FALSE}
+x[x < 4] <- NA #replaces all elements of x that are < 4 with NA
+```
+####  c. x = [0, 0, 0, 0, 0]
+```{r, eval = FALSE}
+x[] <- 0 #replaces all elements of x with 0s
+```
+####  d. x = 0
+```{r, eval = FALSE}
+x <- 0 #replaces x with 0
+```
+
+###3. Fill in the appropriate types of R objects in this sentence: The lapply function in R operates on *a vector or list* and returns *a list*. There may be more than one correct answer.
+
+###4. Suppose we have a 5000 by 3 matrix `m`
+```{r}
+set.seed(1337)
+m <- matrix(runif(15000, -3, 3), ncol = 3)
+```
+
+####a. We need to create a vector containing the sum of the squared entries in each row of `m`. Write R code to do this in two different ways:
+
+####* Using a for loop and saving the result in an object called `m.ssq.loop`:
+```{r}
+m.ssq.loop <- c()
+row_sum <- 0
+for(r in 1:nrow(m)) {
+  for(c in 1:ncol(m)) {
+    row_sum <- row_sum + m[r,c]^2
+  }
+  m.ssq.loop <- c(m.ssq.loop, row_sum)
+  row_sum <- 0
+}
+
+head(m.ssq.loop) # First few elements
+```
+
+####* Using the `apply` function and saving the result in an object called m.ssq.apply (See ?apply):
+```{r}
+m.ssq.apply <- m %>%
+  apply(1:2, function(x) x^2) %>%
+  apply(1,sum)
+
+head(m.ssq.apply) # First few elements
+```
+
+####b. Write a script that will check if your answers in part (a) are the same. It should return `TRUE` if the two vectors are exactly the same and `FALSE` otherwise. This is called a sanity check, and you should do them often when coding.
+```{r}
+check_same <- function(x,y) {
+  return(isTRUE(all.equal(x,y)))
+}
+
+check_same(m.ssq.loop,m.ssq.apply)
+```
+    
+###5. `table1` is given below:
+```{r}
+Year <- c(2000, 2001)
+Algeria <- c(7 ,9)
+Brazil <- c(12, NA)
+Columbia <- c(16, 18)
+
+table1 <- data.frame(Year, Algeria, Brazil, Columbia)
+table1
+```
+
+####a. Wrangle `table1` into the object `table2` as shown below:
+```{r}
+table2 <- table1 %>%
+  gather(key="Country", val="Value", Algeria, Brazil, Columbia)
+table2
+```
+
+####b. Use `table2` to produce `table3` as printed below:
+```{r}
+grouped <- table2 %>% group_by(Year) %>% summarise(Average = mean(Value, na.rm=TRUE))
+table3 <- table2 %>%
+    spread(key="Country", val="Value") %>%
+    transform(Average = grouped$Average)
+# ------------------------OR-------------------------
+# wide <- table2 %>%
+#   wide(key="Country", val="Value")
+# table3 <- spread %>%
+#   transform(Average = rowMeans(wide[,-1], na.rm = TRUE))
+table3
+```
+
+###6. Consider the following graphic:
+####a. What are the glyphs in this graph?
+        Answer: The glyphs are dots representing people in the CPS85 table 
+####b. What are the aesthetics of each glyph?
+        Answer: x-pos, y-pos, color
+####c. Which variables are being mapped to each aesthetic?
+        Answer: x-pos: years of education, y-pos: wage ($/hr), color: sex
+####d. Are the variables qualitative or quantitative?
+        Answer: yrs of education: quantitative, wage: quantitative, sex: qualitative
+####e. What are the guides on this graph?
+        Answer: x-axis: yrs of education, y-axis: hourly wage, color-legend: sex
+####f. Reconstruct this graphic using ggplot and the CPS85 data table. (Hint: the font size of the plot title is 20)
+```{r}
+CPS85 %>%
+  subset(wage <= 15) %>%
+ggplot(aes(x=educ,y=wage,col=sex)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  scale_y_continuous(breaks=seq(0, 15, 5)) +
+  labs(title = "Wage vs. Education in CPS85") +
+  theme(plot.title = element_text(size = 20))
+```
+
+###7. Consider the string my.string given below:
+```{r}
+my.string <- "ggplot2 is a data visualization package for the statistical programming language R"
+```
+
+####a. Write a function `SplitChars` that takes a character string as input and splits it into a vector of single character elements. Hint: the function `strsplit()` may be useful. The result of calling the function on my.string is shown.
+```{r}
+SplitChars <- function(str) {
+  return(unlist(strsplit(str, "")))
+}
+my.string <- SplitChars(my.string)
+my.string
+```
+
+####b. Write a for loop that counts the number of times that a, s, R, r appears in `my.string` and saves it in an object called `count`.
+```{r}
+count <- 0
+for(i in 1:length(my.string)) {
+  char <- my.string[i]
+  if(char == "a" || char == "s" || char == "R" || char == "r") count <- count + 1
+}
+count
+```
+
+####c. Write a function Reverse that reverses the order of a vector of single characters. The result of using it on SplitChars(my.string) is shown below.
+```{r}
+my.string <- "ggplot2 is a data visualization package for the statistical programming language R"
+Reverse <- function(vec) {
+  return(vec[length(vec):1])
+}
+my.string %>% SplitChars %>% Reverse
+```

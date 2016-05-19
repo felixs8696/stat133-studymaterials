@@ -1,0 +1,70 @@
+---
+title: "Lab 7 "
+output: html_document
+---
+```{r, echo=FALSE, include=FALSE}
+library(DataComputing)
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+```
+
+#Question 1
+
+```{r}
+# built-in dataset in R
+head(airquality)
+```
+Change data from wide to narrow format (above) using gather function. 
+Group Ozone, Solar.R, Wind, Temp into one variable called `type` and create another column called `value` to store their values. Your output should look like this:
+
+```{r, echo = FALSE}
+
+```
+
+#Question 2
+Suppose you have a data frame, `data`, as given below:
+```{r data, echo = F}
+# Data frame for questions
+data <- data.frame(V1 = rep(c("a","b","c"), each = 2),
+                   V2 = rep(c(1:2), times = 3),
+                   V3 = rep(c("alpha", "beta", "gamma")),
+                   V4 = seq(10, 60, by = 10))
+print(data)
+```
+
+Assuming that the `tidyr` and `dplyr` libraries are already loaded, write down what the output for the following code.  The final result is enough for full credit, but partial credit will be given for writing out and labelling intermediate steps.
+```{r SQ1, results = 'hide'}
+data %>%
+  filter(V1 == "a") %>% # Step 1
+  select(V2, V4) %>% # Step 2
+  gather(key = Apple, value = Banana, V2, V4) %>% # Step 3
+  mutate(Apple = Banana) # Step 4
+```
+
+#Question 3
+Suppose you have a data frame, `data`, as given below.
+
+a) Write a function called `fix_missing_99` that takes one argument: `x`, a numeric vector.  The function should replace every component of `x` equal to -99 with `NA`.
+b) Write a loop that replaces every -99 in `data` with `NA`.  For full credit, your code must use the function in part (a) and it should continue to work without modification if additional columns are added to the data frame.
+c) Write down an appropriate call from the `apply` family of functionals to perform the same task as in part (b).
+```{r data2, echo = F}
+set.seed(1014)
+data <- data.frame(replicate(6, sample(c(1:10, -99), 6, rep = TRUE)))
+names(data) <- letters[1:6]
+data
+```
+
+#Question 4
+
+Assuming the 'ggplot2' is already loaded. 
+The first 6 rows of the 'diamond' dataset are: 
+  
+```{r, echo = FALSE}
+head(diamonds)
+```
+What command in 'ggplot' that you will use to generate the graph given below? 
+```{r echo=FALSE,fig.height=3,fig.width=6}
+
+```
+

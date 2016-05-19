@@ -1,0 +1,384 @@
+---
+title: "Stat 133 Review- RegEx and CLI"
+author: "Felix Su"
+date: "March 18, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+BibleNames <- read.file("http://tiny.cc/dcf/BibleNames.csv")
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/final/Su-Review-Sheet.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+##Master Function List
+```{r, echo=FALSE}
+Functions <- 
+  c("filter() & grepl()",
+    "mutate() & gsub()",
+    "extractMatches()")
+Purpose <- 
+  c("detect pattern in string",
+    "replace elements of a pattern",
+    "extract component that matches pattern")
+function_table <- data.frame(Functions, Purpose)
+function_table
+```
+
+Cheat Sheet: [CheatSheet]("http://krijnhoetmer.nl/stuff/regex/cheat-sheet/")
+
+Some basics:
+
+* Very simple patterns:
+    * A single `.` means "any character."
+    
+    * A character, e.g., `b`, means just that character.
+    
+    * Characters enclosed in square brackets, e.g., `[aeiou]` means any of those characters.  (So, `[aeiou]` is a pattern describing a vowel.) 
+    
+    * The `^` inside square brackets means "any except these."  So, a consonant is `[^aeiou]`
+    
+* Alternatives.  A vertical bar means "either."  For example `(A|a)dam` matches `Adam` and `adam`
+
+* Repeats
+
+     * Two simple patterns in a row, means those patterns consecutively.  Example: `M[aeiou]` means a capital M followed by a lower-case vowel.
+     
+     * A simple pattern followed by a `+` means "one or more times." For example `M(ab)+` means `M` followed by one or more `ab`.  
+     
+     * A simple pattern followed by a `?` means "zero or one time."
+     
+     * A simple pattern followed by a `*` means "zero or more times."
+     
+     * A simple pattern followed by `{2}` means "exactly two times."  Similarly, `{2,5}` means between two and five times, `{6,}` means six times or more.
+     
+* Start and end of strings.  For instance, `[aeiou]{2}` means "exactly two vowels in a row."
+
+    * `^` at the beginning of a regular expression means "the start of the string"
+    
+    * `$` at the end means "the end of the string."
+    
+* Using \\. will be interpreted as a simple . (dot) character
+
+##Regex
+
+####grepl()
+Returns vector of all cases that matches with `[regex]` within each element of a character vector
+`grepl(regex,vec)`
+```{r, eval=FALSE}
+#regex=shine: name contains “shine”, reges=[aeiou]{3,}:contains three or more vowels in a row
+NameList %>% 
+  filter( grepl([regex], name )) %>% 
+  head()
+```
+
+```{r}
+x <- c(1, +12.4,-56.899,  0, -23, .000, -0, "4.5.3")
+#Match any number
+grepl("^[-+]?[0-9]+\\.?[0-9]*$",x)
+```
+
+####gsub()
+Replaces all matches of '[regex]' within each element of a character vector 
+`gsub(regex, replacement, vec)`
+```{r, eval=FALSE}
+# Replaces all '$' and 'billion' within each case for the variable 'debt'
+# Replaces all '%' within each case for the variable 'percentGDP'
+Debt %>% 
+  mutate( debt=gsub("[$,]|billion","",debt),
+          percentGDP=gsub("%", "", percentGDP))
+```
+
+####ExtractMatches()
+Pulls out the matches for marked regions of regular expressions
+`df %>% extractMatches(regex, var,...)`
+
+* Part of the regexp wrapped in parentheses will be matched and extracted as a string
+
+```{r}
+# Returns all cases that contain 're' and puts the matches regex 'e' in a variable called 'match1'
+data.frame(string=c("hi there there","bye")) %>% extractMatches("r(e)",string)
+
+# Common end vowels for bible names
+# Returns all cases that end with a vowel, extractMatches() puts the matched regex vowel into a new variable called 'vowel'
+BibleNames %>% 
+  extractMatches( "([aeiou])$", name, vowel=1) %>% 
+  group_by(vowel ) %>% 
+  summarise( total= n()) %>%
+  arrange( vowel, desc(total) )
+
+# Extracts if bible name starts with a vowl and ends with a vowel
+# Puts first vowel match in variable 'beg_vowel'
+# Puts second vowel match in variable 'end_vowel'
+BibleNames %>% 
+  extractMatches( "^([AEIOU]).*([aeiou])$", name, beg_vowel=1, end_vowel=2) %>% 
+  filter(!is.na(beg_vowel) & !is.na(end_vowel)) %>%
+  select(-meaning) %>%
+  head()
+```
+
+####Capture Classes vs. Character Classes
+```{r, eval=FALSE}
+# Names that contain 'bar' or 'dam' or 'lory'
+BibleNames %>%
+  filter(grepl("(bar)|(dam)|(lory)", name)) %>%
+  head()
+# Names that contain 'b','a','r','d','m','l','o',or 'y'
+BibleNames %>%
+  filter(grepl("[bar]|[dam]|[lory]", name)) %>%
+  head()
+```
+
+####Anchors
+```{r, echo=FALSE}
+Regex <- 
+  c("^",
+    '\\\\A',
+    "$",
+    '\\\\Z',
+    "\\\\b",
+    "\\\\B",
+    "\\\\<",
+    "\\\\>")
+Description <- 
+  c("Start of string, or start of line in multi-line pattern",
+    "Start of string",
+    "End of string, or end of line in multi-line pattern",
+    "End of string",
+    "Word boundary",
+    "Not word boundary",
+    "Start of word",
+    "End of word")
+anchor_table <- data.frame(Regex, Description)
+anchor_table
+```
+
+####POSIX
+```{r, echo=FALSE}
+Regex <- 
+  c("[:upper:]",
+    "[:lower:]",
+    "[:alpha:]",
+    "[:alnum:]",
+    "[:digit:]",
+    "[:xdigit:]",
+    "[:punct:]",
+    "[:blank:]",
+    "[:space:]",
+    "[:cntrl:]",
+    "[:graph:]",
+    "[:print:]",
+    "[:word:]")
+Description <- 
+  c("Upper case letters",
+    "Lower case letters",
+    "All letters",
+    "Digits and letters",
+    "Digits",
+    "Hexadecimal digits",
+    "Punctuation",
+    "Space and tab",
+    "Blank characters",
+    "Control characters",
+    "Printed characters",
+    "Printed characters and spaces",
+    "Digits, letters and underscore")
+posix_table <- data.frame(Regex, Description)
+posix_table
+```
+
+####Quantifiers
+```{r, echo=FALSE}
+Regex <- 
+  c("*",
+    '{3}',
+    "+",
+    '{3,}',
+    "?",
+    "{3,5}")
+Description <- 
+  c("0 or more",
+    "Exactly 3",
+    "1 or more",
+    "3 or more",
+    "0 or 1",
+    "3, 4 or 5")
+quant_table <- data.frame(Regex, Description)
+quant_table
+```
+
+####Groups and Ranges
+Rnages are inclusive
+[Non-Capturing Group Explanation]("http://stackoverflow.com/questions/3512471/what-is-a-non-capturing-group")
+```{r, echo=FALSE}
+Regex <- 
+  c(".",
+    '(a|b)',
+    "(...)",
+    '(?:...)',
+    "[abc]",
+    "[^abc]",
+    "[a-q]",
+    "[A-Q]",
+    "[0-7]",
+    "\\\\x")
+Description <- 
+  c("Any character except new line (\n)",
+    "a or b",
+    "Group",
+    "Passive (non-capturing) group",
+    "Range (a or b or c)",
+    "Not (a or b or c)",
+    "Lower case letter from a to q",
+    "Upper case letter from A to Q",
+    "Digit from 0 to 7",
+    "Group/subpattern number 'x'")
+gandr_table <- data.frame(Regex, Description)
+gandr_table
+```
+
+##CLI
+
+####Viewing File
+
+`cat` allows you to display the contents of the file on the terminal
+```{r, eval=FALSE}
+cat stars.csv
+```
+
+`head` and `tail` let you look at the first and last observations
+```{r, eval=FALSE}
+# first 5 rows
+head -5 stars.csv
+
+# last 4 rows
+tail -4 stars.csv
+```
+
+Use `wc` for the number of characters, lines, or words
+```{r, eval=FALSE}
+# number of words default
+wc stars.csv
+
+# number of characters
+wc -c stars.csv
+
+# number of lines (i.e. rows)
+wc -l stars.csv
+
+# number of words (not very useful in this case)
+wc -w stars.csv
+```
+
+##Regex Search
+Use `egrep` to get all rows that match a RegEx
+```{r, eval=FALSE}
+# "female" subjects
+egrep female stars.csv  #here female is a regular expression
+
+# "jedi"
+egrep [^_]jedi stars.csv  #here we need to avoid no_jedi.
+```
+
+##Get Specific Columns
+```{r, echo=FALSE}
+Options <- 
+  c('-f 1,3',
+    '-d ","',
+    '-c 3-8')
+Description <- 
+  c("Return columns 1 and 3, delimited by tabs",
+    "Use commas as delimiters instead of tabs",
+    "Return characters 3 through 8 from the file")
+cat_table <- data.frame(Options, Description)
+cat_table
+```
+
+```{r, eval=FALSE}
+# first column
+cut -f 1 -d ',' stars.csv
+
+# name and planet
+cut -f 1,8 -d ',' stars.csv
+```
+
+##File Redirection
+```{r, eval=FALSE}
+# Create new file humans.csv from all rows in stars.csv that contain 'human'
+egrep human stars.csv > humans.csv
+```
+
+##Pipe Redirection
+```{r, eval=FALSE}
+# names of first 5 rows
+head -5 stars.csv | cut -f 1 -d ","
+
+# names in rows 2-6
+head -6 stars.csv | tail -5 | cut -f 1 -d ","
+
+# names of female subjects
+egrep female stars.csv | cut -f 1 -d ","
+```
+
+##Sorting
+```{r, echo=FALSE}
+Options <- 
+  c('-n',
+    '-r',
+    '-k 3',
+    '-t ","',
+    '-u')
+Description <- 
+  c("Sort by numeric value rather than alphabetically",
+    "Sort in inverse order",
+    "Sort lines based on column 3 (space or tab delimiter)",
+    "Use commas for delimiters instead of tabs or spaces",
+    "Return only a single unique representative")
+sort_table <- data.frame(Options, Description)
+sort_table
+```
+
+```{r, eval=FALSE}
+# sorting names
+cut -f 1 -d "," stars.csv | sort
+
+# sorting names in reverse order
+cut -f 1 -d "," stars.csv | sort -r
+```
+
+##Unique rows
+Removes **consecutive** identical lines from a file, leaving one unique representative.
+```{r, echo=FALSE}
+Options <- 
+  c('-c',
+    '-f 4',
+    '-i')
+Description <- 
+  c("Count the number of occurrences of each unique line",
+    "Ignore the first 4 fields in determinind uniqueness",
+    "	Ignore case when determining uniqueness")
+uniq_table <- data.frame(Options, Description)
+uniq_table
+```
+
+```{r, eval=FALSE}
+# SORT FIRST to get consecutive duplicates: unique species
+cut -f 12 -d "," stars.csv | sort | uniq
+
+# counts of species
+cut -f 12 -d "," stars.csv | sort | uniq -c
+
+# Get rid of label line
+head stars.csv # To check if label row ecists
+wc -l stars.csv # gets number of lines as 21
+tail -20 stars.csv | cut -f 12 -d "," | sort | uniq -c # use every row except the first
+```

@@ -1,0 +1,44 @@
+---
+title: "Assignment 10"
+author: "Felix Su"
+date: "April 6, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(XML)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw10/Assignment-10-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+## Google Earth KML Doc of Earthquakes of Magnitude 4+
+```{r}
+quakes <- read.csv("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw10/NCEDC3+quakes.csv")
+quakes4up <- quakes %>% filter(Magnitude>=4.00)
+long <- quakes4up$Longitude
+lat <- quakes4up$Latitude
+doc <- newXMLDoc()
+root <- newXMLNode("kml", namespaceDefinitions = "http://www.opengis.net/kml/2.2", doc=doc)
+dcmt <- newXMLNode("Document", parent = root)
+name <- newXMLNode("name", "Earthquakes", parent=dcmt)
+desc <- newXMLNode("description", "4+ Earthquakes, 1966-present", parent=dcmt)
+datetime <- as.character(quakes4up$DateTime)
+datetimefix <- gsub("/", "-", datetime)
+datetimefix <- gsub(" ", "T", datetimefix)
+for (i in 1:length(long)){
+  pmark <- newXMLNode("Placemark", parent=dcmt)
+  pt <- newXMLNode("Point", parent = pmark)
+  coord <- newXMLNode("coordinates", paste(long[i], lat[i], 0, sep=","), parent=pt)
+  tstamp <- newXMLNode("TimeStamp", parent=pmark)
+  when <- newXMLNode("when", paste(datetimefix[i],"Z",sep = ""), parent=tstamp)
+}
+saveXML(doc, "/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw10/earthquakes4.kml")
+```

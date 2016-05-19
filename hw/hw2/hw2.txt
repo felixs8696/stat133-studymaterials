@@ -1,0 +1,117 @@
+Assigned: Monday January 25: (2-7, 2-8, 2-10, p 26) (3-4,  p 35)
+
+Problem 2.7
+
+16 variables
+336,776 cases
+flights that departed NYC in 2013
+Variable Types
+year: quantitative
+month: quantitative
+day: quantitative
+dep_time: quantitative
+dep_delay: quantitative
+arr_time: quantitative
+arr_delay: quantitative
+carrier: categorical
+tail_num: categorical
+flight: quantitative
+origin: categorical
+dest: categorical
+air_time: quantitative
+distance: quantitative
+hour: quantitative
+minute: quantitative
+Variable Units
+air_time: minutes
+distance: miles
+Problem 2.8
+
+Improper syntax for function argument
+No/Incorrect assignment operator
+Invalid object name
+Unmatched quotes in character string
+No mistake
+Problem 2.10
+
+76 variables in CountryData
+tfat = mass of trunk fat
+23018 cases in WorldCities
+3rd variable in BabyNames = count
+Party Codes
+DEM = Democratic
+LIB = Libertarian
+REP = Republican
+UNA = Unaffiliated
+Problem 3.4
+
+BabyNames: (b) data table name
+filter: (a) function name
+name: (c) variable name
+==: (a) function name
+group_by: (a) function name
+year: (c) variable name
+sex: (c) variable name
+summarise: (a) function name
+yearlyTotal: (d) name of a named argument
+sum: (a) function name
+count: (c) variable name
+ggplot: (a) function name
+aes: (a) function name
+x: (d) name of a named argument
+y: (d) name of a named argument
+geom_point: (a) function name
+color: (d) name of a named argument
+geom_vline: (a) function name
+xintercept: (d) name of a named argument
+Assigned: Wednesday January 27:  (3-5, 3-6 p. 35) (4-1, 4-5 p. 45)
+
+Problem 3.5
+
+brainwt: brain weight in kilograms
+83 cases
+Mammals of certain weights
+vore levels:
+carnivore, omnivore, or herbivore
+Problem 3.6
+
+(c) does not belong because it assigns the average of all the count values to totalBirths instead of sum, like the others
+Problem 4.1
+
+*one* : italicized
+**two** : bolded
+* three : bulleted
+# Four : h1 header
+‘five’ : code
+## six: h2 header
+[seven](http://tiny.cc/dcf/index.html): link
+Problem 4.5
+
+---
+title: "Birds of the World"
+author: "JJ Audubon"
+date: ""
+output: 
+html_document:
+fig_height: 3
+fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- Don't edit the material above this line -->
+There are many species of birds in the world. From my studio, I can see
+
+* Blue Jays
+* Cardinals
+* Robins
+* Crows
+* Sparrows
+
+ 

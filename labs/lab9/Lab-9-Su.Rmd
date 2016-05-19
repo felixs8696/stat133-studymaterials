@@ -1,0 +1,69 @@
+---
+title: "Lab 9"
+author: "Felix Su"
+date: "March 31, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab9/Lab-9-Su.Rmd")
+```
+
+###Reading from stars.csv
+```{r eval=FALSE}
+# how many humans
+egrep human stars.csv | wc -l
+# 12
+
+# how many jedis
+tail -20 stars.csv | egrep [^_]jedi | wc -l
+# 6
+
+# names of jedis
+tail -20 stars.csv | egrep [^_]jedi | cut -f 1 -d ","
+# Anakin Skywalker
+# Luke Skywalker
+# Qui-Gon Jinn
+# Obi-Wan Kenobi
+# Yoda
+# Dooku
+
+# names of jedis in alphabetical order
+tail -20 stars.csv | egrep [^_]jedi | cut -f 1 -d "," | sort
+# Anakin Skywalker
+# Dooku
+# Luke Skywalker
+# Obi-Wan Kenobi
+# Qui-Gon Jinn
+# Yoda
+
+# table of frequencies for weapons
+tail -20 stars.csv | cut -f 13 -d "," | sort | uniq -c
+#   5 blaster
+#   1 bowcaster
+#   1 force-lightning
+#   7 lightsaber
+#   1 slugthrower
+#   1 spear
+#   4 unarmed
+
+# table of frequencies for weapons in decreasing order
+tail -20 stars.csv | cut -f 13 -d "," | sort | uniq -c | sort -r
+#   7 lightsaber
+#   5 blaster
+#   4 unarmed
+#   1 spear
+#   1 slugthrower
+#   1 force-lightning
+#   1 bowcaster
+
+#---
+```

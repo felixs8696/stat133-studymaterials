@@ -1,0 +1,197 @@
+---
+title: "Assignment 6"
+author: "Felix Su"
+date: "Feb 25, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw6/Assignment-6-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+##Problem 1
+
+---
+
+1. Write a function that takes a number year and returns a logical value which is either TRUE, if the year was or will be a leap year, or FALSE if not. The rule for determining leap years is that one of the following conditions must hold:
+    1) the year is divisible by 4 but not divisible by 100, or
+    2) the year is divisible by 400.
+```{r}
+leapYear <- function(year) {
+    return((year%%4 == 0 & year %% 100 != 0) | year%%400 == 0)
+}
+```
+Now write an R expression using your function to calculate how many leap years you have lived through during your lifetime.
+
+```{r}
+#Note: Includes leap year for 2016 assuming that this is graded on or after February 29th this year.
+count <- 0
+for(i in 1996:2016) {
+  if (leapYear(i)) count <- count + 1
+}
+print(count)
+```
+
+##Problem 2
+
+---
+```{r}
+# Helper Functions to avoid redundant code
+# Put these here because I will reuse these functions throughout Problem 2, particularly 2a and 2b.
+proportion <- function(x, y) {
+  in_circle <- 0
+  total <- 0
+  for (i in 1:length(x)) {
+    if(x[i]^2 + y[i]^2 < 1) in_circle <- in_circle + 1
+    total <- total + 1
+  }
+  return(in_circle/total)
+}
+
+included <- function(x, y) {
+  return(x^2 + y^2 < 1)
+}
+```
+2. It is possible to approximate the area of any two-dimensional shape using a Monte Carlo technique. To do this, we specify a region of known area that contains the shape, sample uniformly on that region, then multiply the known area by the fraction of the points that fall within the shape we’re trying to measure. In this problem you’ll write code to carry this out for a circle with radius equal to one. We can compare this to what we already know about the area of circles to see how well our approximation method performs.
+    a. Write expressions in R to do the following:
+        * Create two vectors x and y of length 100, where each is sampled from the Uniform distribution with lower limit -1 and upper limit 1.
+        * Calculate the proportion of these for which the point (x, y) lies within the unit circle.
+        * Make a scatter plot of x and y, coloring the points differently depending on whether they’re inside the unit circle or not.
+        * Multiply the proportion by 4 (the area of the square over which we’re sampling) to approximate the area inside the circle.
+    ```{r fig.height = 4, fig.width = 5}
+    #Problem 1.a.1
+    x <- runif(100, min = -1, max = 1)
+    y <- runif(100, min = -1, max = 1)
+    
+    #Problem 1.a.2
+    prop <- proportion(x, y)
+    print(paste("Proportion: ", prop))
+    
+    #Problem 1.a.3
+    s_plot <- data.frame(x, y, in_circle = included(x, y))
+    ggplot(s_plot, aes(x = x, y = y, color = in_circle)) + geom_point() +
+      xlab("x") + ylab("y") + ggtitle("Unit Circle Coordinates")
+    
+    #Problem 1.a.4
+    print(paste("Area: ", 4*prop))
+    ```
+    b. Now copy your code from part (a) and use it to create a function that takes arguments n (for sample size) and plotit (to indicate whether or not to make the plot) and returns the approximated area and optionally makes a plot depending on whether plotit is TRUE or FALSE. Give each argument a default value of your choosing.
+    ```{r fig.height=4, fig.width=5}
+    # Part 2a code wrapped in a function with arguments for sample size and plotit
+    plot_circle <- function(n=100, plotit=TRUE) {
+      x <- runif(n, min = -1, max = 1)
+      y <- runif(n, min = -1, max = 1)
+      if(plotit) {
+        s_plot <- data.frame(x, y, in_circle = included(x, y))
+        ggplot(s_plot, aes(x = x, y = y, color = in_circle)) + geom_point() +
+          xlab("x") + ylab("y") + ggtitle("Unit Circle Coordinates") 
+      }
+      # Still multiplies by 4 assuming the bounding box is still a square of area 4
+      return(4*proportion(x, y))
+    }
+    ```
+    c. The replicate function takes an R expression and evaluates it a specified number of times. You can think of it as a very simplified for loop in which exactly the same code gets evaluated each time through the loop. Use this function to approximate the area of the circle 100 times, first for n=50 and then for n=500
+and storing the results in two different vectors.
+    ```{r}
+    # Stored 100 Monte Carlo Approximations in vectors with sample sizes of 50 and 500 respectively
+    n_50 <- replicate(100, plot_circle(50, FALSE))
+    n_500 <- replicate(100, plot_circle(500, FALSE))
+    ```
+    d. Make two histograms (facetted by vector size) showing the results from part (c). Add a vertical line to the plot to indicate the true area. Give your plot appropriate axis names and titles and a nice readable theme.
+    ```{r fig.height=4, fig.width = 8}
+    # Histogram plot with 2 factors, one on MC approx. on 50 samples and one on 500 samples.
+    mc_circle_df <- data.frame(vec_size=c(rep("Sample 50", times=length(n_50)),
+                                          rep("Sample 500", times=length(n_500))),
+                               approx_area=c(n_50, n_500))
+    ggplot(mc_circle_df, aes(x=approx_area)) +
+      geom_histogram(binwidth = .01, fill = "gray") +
+      geom_vline(aes(xintercept = pi)) +
+      facet_wrap("vec_size") +
+      labs(x = "Unit Circle Area Approximation",
+           y = "Number of Approximations",
+           title = "Monte Carlo Unit Circle Approximate Area") +
+      theme(
+        plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0), colour = "white"),
+        axis.title = element_text(size = 15, colour = "white"),
+        axis.text = element_text(colour = "white"),
+        plot.background = element_rect(fill = "navy")
+      )
+    ```
+
+##Problem 3
+
+---
+
+3. Functions can be passed as arguments to other functions. Here’s an example that we will explore. (This problem uses a while loop, which we will cover in class, however you don’t need to know how to write a while loop yourself to do this problem.) Newton’s method is a popular numerical method to find a root of an algebraic equation $f(x) = 0$. If $f(x)$ has a derivative $f′(x)$, then the following iteration will converge to a root of the above equation if started close enough to the root: $$ \begin{aligned} x_1 &= \text{ initial guess }\\ x_n &= x_n−1 − \frac{f(x_n−1)}{f'(x_n−1)} \end{aligned} $$
+This idea is based on the Taylor approximation $$f(x_n) \approx f(x_n−1) + (x_n − x_n−1)f'(x_n−1)$$
+Suppose $f(x) = x^3 + 2x^2 − 7$, so that $f'(x) = 3x^2 + 4x$. The file Newton.R contains some R code to implement Newton’s method for this problem. You may adapt this code as needed to do the following problems.
+    a. Write a function that implements Newton’s method for this particular choice of function $f$. It should have arguments for the initial guess and the tolerance for convergence (currently set to 0.00001 in my code). Pay special attention to whether either of these should have default values. The function should return a single number and not plot anything.
+    ```{r}
+    # Newton's Method function for particular case where fx = x^3 + 2*x^2 - 7 and f'x = 3*x^2 + 4*x
+    particular_nm <- function(init = -2, tol = .00001) {
+      x <- init # initial guess
+      fx <- x^3 + 2*x^2 - 7
+      while(abs(fx) > tol){
+        fpx <- 3*x^2 + 4*x
+        x <- x - fx/fpx
+        fx <- x^3 + 2*x^2 - 7
+      }
+      return(x)
+    }
+    ```
+    b. Write two R functions for $f$ and $f'$. Each should take argument $x$.
+    ```{r}
+    # Arithmetic functions from part 4a wrapped in R functions
+    fx <- function(x) {
+      return(x^3 + 2*x^2 - 7)
+    }
+    fpx <- function(x) {
+      return(3*x^2 + 4*x)
+    }
+    ```
+    c. Rewrite your function from (a) so that it also takes arguments for the function whose root you want to find and its first derivative. You may find it helpful to first use your functions from (b) and make sure the function still works, then modify the arguments to the function. 
+    ```{r}
+    # General Newton's Method function with additional arguments for fx and f'x
+    newtons_method <- function(f_x, f_px, init, plot, plotit = FALSE, tol = .00001) {
+      x <- init # initial guess
+      fx <- f_x(x)
+      while(abs(fx) > tol){
+        fpx <- f_px(x)
+        x <- x - fx/fpx
+        fx <- f_x(x)
+        if(plotit) {
+          df=data.frame(a=x,b=fx)
+          print(df)
+          plot <- plot + geom_point(x=x,y=fx ,col="blue",size=3)
+        }
+      }
+      if(plotit) print(plot + geom_hline(yintercept = 0))
+      return(x)
+    }
+    ```
+    d. Choose a different function $f$ and write R functions for it and the corresponding derivative. Make a plot as I did in Newton.R to verify that the algorithm found a root of your function. (Note: There are some cases in which Newton’s method will fail to converge, which you will experience as the while loop never ending. If that happens to you, just choose another initial guess and/or function.)
+    ```{r}
+    # Newton's Method test on custom functions
+    xseq <- seq(0, 1, length = 100)  #100 x values between -5 and 5
+    yseq <- 4*xseq^4 - 3*xseq^3 + 2*xseq^2 - 1 #100 corresponding y values according to function y=4x^4-3x^3+2x^2-1
+    df <- data.frame(xseq,yseq) #make a data frame with variables xseq and yseq
+    p <- df %>% ggplot(aes(x=xseq, y=yseq)) + geom_line(stat="identity", col="red")
+    
+    my_fx <- function(x) {
+      return(4*x^4 - 3*x^3 + 2*x^2 - 1)
+    }
+    my_fpx <- function(x) {
+      return(16*x^3 - 9*x^2 + 4*x)
+    }
+    newtons_method(my_fx, my_fpx, 1, p, TRUE)
+    ```

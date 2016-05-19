@@ -1,0 +1,284 @@
+---
+title: "Assignment 3"
+author: "Felix Su"
+date: "February 1, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("~/ucb_classes/Sp16/STAT133/hw/hw3/Assignment-Three-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+###Monday Assignment
+**Problem 5.4**
+```{r}
+ggplot(data=CPS85,aes(x=exper,y=wage))+geom_point()+aes(colour=married)+facet_wrap(~sector,ncol=4)
+```
+
+**Problem 6.3**
+
+1. For each of the two glyphs,list the set of graphical attributes both geometrically (e.g. “dot”) and in terms of the variable from the table that is mapped to that attribute (e.g., polarity).
+    
+    * star graphical attributes
+        + **position**
+            - **x = protein**
+            - **y = high density**
+        + **significance**
+    * arrowbar graphical attributes
+        + **position**
+            - **x = protein**
+            - **y = center density**
+        + **label**
+        + **color**
+            - **polarity**
+                + **blue = plus**
+                + **red = minus**
+        + **bar_length**
+            - **high density - low density**
+
+2. Which variables define the frame? Give variables for both the horizontal and vertical coordinates.
+    
+    + **x = protein**
+    + **y = center density**
+
+3. Is color an attribute of the glyph?
+    + **No**
+
+4. What guides (if any) are displayed?
+    + **y guide = density tick marks**
+    + **x guide = protein names**
+    + **color = blue polarity color label**
+
+**Problem 6.6**
+
+In Figure 6.9, what is the glyph and its graphical attributes?
+
++ **Glyph: Rectangle. Graphical attribute: color and text.**
+
+**Problem 6.8**
+```{r}
+Small <- NCHS %>% sample_n(size=5000)
+ggplot(data=Small,aes(x=bmi,y=weight))+geom_point()+aes(colour=smoker) 
+```
+
+Write down the mapping between variables and graphical attributes.
+
+* Glyph Aesthetics:
+    + **position**
+        - **x position: bmi**
+        - **y position: weight**
+    + **color**
+        - **red : smoker**
+        - **blue : non-smoker**
+
+###Wednesday Assignment
+
+**Problem 6.2**
+
+1. List all of the guides in the graph. For each one, say which variable is being mapped to which graphical attribute.
+    + **x-axis tick marks**
+        + **gene label: x position**
+    + **y-axis tick marks**
+        + **Log enyzme concentration: y position**
+    + **target sections**
+        + **target type: x position**
+    + **Molecule guide**
+        + **molecule type: color**
+    + **Flux guide**
+        + **positive flux: filled glyph**
+        + **0 flux: outline glyph**
+
+2. The basic glyph is a dot. Say what are the graphical attributes of the dot (e.g. color, size, ...). For each graphical attribute found in the graph, say which variable is mapped to that attribute.
+    + **position**
+        + **x position: gene label and target type**
+        + **y position: Log enyzme concentration**
+    + **color**
+        + **molecule type**
+    + **fill**
+        + **filled: positive flux**
+        + **outline: 0 flux**
+
+3. Which two variables set the frame?
+    + **x = gene label**
+    + **y = Log enyzme concentration**
+
+4. The scaling of the horizontal variable (e.g.the translation of position to variable levels) is set by a combination of two variables. Which two?
+    + **gene label**
+    + **target type**
+
+**Problem 7.2**
+
+1. Which color diamonds seem to be largest on average (in terms of carats)?
+    + **Diamonds with color "J" (worst) seem to be the largest on average (in terms of carats)**
+```{r}
+diamonds %>%
+  group_by(color) %>%
+  summarise(size = mean(carat)) %>%
+  arrange(desc( size )) %>%
+  head( 1 )
+```
+
+2. Which clarity of diamonds has the largest average “table” per carat?
+    + **Diamonds with clarity "VVS1" seem to have the largest average “table” per carat**
+```{r}
+diamonds %>%
+  group_by(clarity) %>%
+  summarise(tbl_per_carat = mean(table/carat)) %>%
+  arrange(desc( tbl_per_carat )) %>%
+  head( 1 )
+```
+
+**Problem 7.4**
+Each of these statements have an error. It might be an error in syntax or an error in the way the data tables are used, etc. Tell what are the error(s) in these expressions.
+
+a) `BabyNames %>% group_by( "First" ) %>% summarise( votesReceived=n() )`
+    + **Error: trying to get votesReceived from the wrong table. Number of cases in BabyNames does not reflect meaningful data on any kind of voting.**
+b) `Tmp <- group_by(BabyNames, year, sex ) %>% summarise( Tmp, totalBirths=sum(count))`
+    + **Error: Trying to bind data table Tmp to summarise, but it has not been declared yet. It should be removed because BabyNames will be piped in. Also, because BabyNames is piped in, this function will try to use Tmp as a variable binding, which will cause an error.**
+c) `Tmp <- group_by(BabyNames, year, sex) summarise( BabyNames, totalBirths=sum(count) )`
+    + **Error: Missing a piping symbol. This will cause an 'unexpected' symbol error because R does not understand the connection between group_by and summarise. Note: Can also use nesting if so desired.**
+
+**Problem 7.5**
+For each of the following outputs, identify the operation linking the input to the output and write down the details (i.e., arguments) of the operation.
+
+a) Output Table A
+    + **Variables: sex, count**
+    + **Verbs: group_by, summarize**
+    + **Operation:**
+    ```
+    Input %>%
+      group_by(sex) %>%
+      arrange(count)
+    ```
+b) Output Table B
+    + **Variables: sex**
+    + **Verbs: group_by**
+    + **Operation:**
+    ```
+    Input %>%
+      group_by(sex)
+    ```
+c) Output Table C
+    + **Variables: name, sex**
+    + **Verbs: group_by, arrange**
+    + **Operation:**
+    ```
+    Input %>%
+      group_by(name, sex) %>%
+      arrange(name)
+    ```
+d) Output Table D
+    + **Variables: count**
+    + **Verbs: summarize, sum**
+    + **Operation:**
+    ```
+    Input %>%
+      summarise(total = sum(count)) %>%
+    ```
+e) Output Table E
+    + **Variables: name, count**
+    + **Verbs: group_by, select**
+    + **Operation:**
+    ```
+    Input %>%
+      group_by(name) %>%
+      select(name, count)
+    ```
+    
+**Problem 7.6**
+
+1. How many cases are there?
+    + **80101 cases**
+2. Who were the top 5 candidates in the Second vote selections.
+```{r}
+Minneapolis2013 %>%
+  group_by(Second) %>%
+  summarise(sec_vote = n()) %>%
+  arrange(desc(sec_vote)) %>%
+  head(6)
+```
+    + 1) Betsey Hodges, 2) Don Samuels, 3) Mark Andrew, 4) Jackie Cherryhomes, 5) Bob Fine
+    + Note: Does not include "undervote"
+3. How many ballots are marked “undervote” in 
+    + First choice selections: **834 undervotes**
+    + Second choice selections: **10598 undervotes**
+    + Third choice selections: **19210 undervotes**
+```{r}
+Minneapolis2013 %>%
+  summarise(count = sum(First == "undervote"))
+Minneapolis2013 %>%
+  summarise(count = sum(Second == "undervote"))
+Minneapolis2013 %>%
+  summarise(count = sum(Third == "undervote"))
+```
+4. What are the top 3 combinations of First and Second vote selections? (That is, of all the possible ways a voter might have marked his or her first and second choices, which received the highest number of votes?)
+```{r}
+Minneapolis2013 %>%
+  group_by(First, Second) %>%
+  summarise(count = n()) %>%
+  filter(count > 6000) %>%
+  arrange(desc(count))
+```
+    + **1) Betsy Hodges, Mark Andrew**
+    + **2) Betsy Hodges, Don Samuels**
+    + **3) Mark Andrew, Betsy Hodges**
+5. Which Precinct had the highest number of ballots cast?
+    + **P-06 had the highest amount of ballots cast at 9711**
+```{r}
+Minneapolis2013 %>%
+  group_by(Precinct) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count)) %>%
+  head(1)
+```
+
+**Problem 8.1**
+Match each of the functions to the task it performs.
+
+a) geom_point()
+    + **2) Add a layer of glyphs**
+b) geom_histogram()
+    + **2) Add a layer of glyphs**
+c) ggplot()
+    + **1) Construct the graphics frame**
+d) scale_y_log10()
+    + **5) Change the scale for the frame.**
+e) ylab()
+    + **3) Set an axis label**
+f) facet_wrap()
+    + **4) Divide the frame into facets**
+g) geom_segment()
+    + **2) Add a layer of glyphs**
+h) xlim()
+    + **5) Change the scale for the frame.**
+i) facet_grid()
+    + **4) Divide the frame into facets**
+    
+**Problem 8.2**
+Here are two more graphics based on the
+mosaicData::CPS85 data table. Write ggplot2() statements that will construct each graphic.
+
+1)
+```{r}
+ggplot(CPS85,aes(x=age,y=wage,shape=married)) +
+  facet_wrap( ~ sector) +
+  xlim(0, 70) + ylim(0, 30) +
+  geom_point()
+```
+
+2)
+```{r}
+ggplot(CPS85,aes(x=age,y=wage,shape=married)) +
+  facet_grid(sex ~ married) +
+  xlim(0, 70) + ylim(0, 50) +
+  geom_point()
+```

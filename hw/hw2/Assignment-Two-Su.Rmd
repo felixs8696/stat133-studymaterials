@@ -1,0 +1,66 @@
+---
+title: "Small Project Books"
+author: "Felix Su"
+date: "29 Jan, 2016"
+output:
+  html_document:
+    fig_height: 3
+    fig_width: 5
+  word_document: default
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments('~/ucb_classes/Sp16/STAT133/hw/hw2/Assignment-Two-Su.Rmd')
+```
+<!-- Don't edit the material above this line -->
+
+# Basics
+```{r}
+load("Library-small.rda")  #file path for home directory is "~/ucb_classes/Sp16/STAT133/hw/hw2/Library-small.rda"
+```
+
+```{r inv_cases, echo=FALSE, results='hide'}
+inv_casenum <- nrow(Inv)
+inv_varnum <- ncol(Inv)
+inv_variables <- colnames(Inv)
+bks_casenum <- nrow(Bks)
+bks_varnum <- ncol(Bks)
+bks_variables <- colnames(Bks)
+```
+
+## Inv Data
+**Properties:** 'data.frame':	`r inv_casenum` obs. of  `r inv_varnum` variables  
+**Variables:** `r inv_variables`
+**Description:** Shows data about each book's status in inventory. This is mostly used for logistical information regarding checkout, shelving, sorting, etc. A user would retrieve from this table if he/she wants information about the state of the library.
+
+## Bks Data
+**Properties:** 'data.frame':	`r bks_casenum` obs. of  `r bks_varnum` variables  
+**Variables:** `r bks_variables`  
+**Description:** Shows data representing each book. This is used to store the book's specific details such as author, title, Dewey decimal number, etc. A user would retrieve from this table if he/she wants information about the state of individual books.
+
+#### Inv Grouped by Status
+```{r}
+Inv %>%
+  group_by(Current.Status) %>%
+  tally()
+```
+
+#### Inv Grouped by Issue Count
+```{r}
+Inv %>%
+  group_by(Issued.Count) %>%
+  tally()
+```
+
+**Description:** The first data frame, grouped by `Current.Status`, shows the number of books currently at each status ('AVAILABLE', 'MISSING', 'ON_LOAN', 'WITHDRAWN') and the second data frame, grouped by `Issued.Count`, shows the number of times each book was checked out.
+
+***
+
+Downloaded data from [Library-small database]("http://tiny.cc/dcf/Library-small.rda")
+
+Stored File at `~/ucb_classes/Sp16/STAT133/hw/hw2/Library-small.rda`

@@ -1,0 +1,87 @@
+---
+title: "Assignment 8"
+author: "Felix Su"
+date: "March 19, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw8/Assignment-8-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+```{r}
+Addresses <- read.file("http://tiny.cc/dcf/street-addresses.csv")
+```
+
+##Back to the Streets
+
+**Your turn:** Read the following R statements. Next to each line, give a short explanation of what the line contributes to the task. For each of the regexes, explain in simple everyday language what pattern is being matched.
+```{r}
+ # sets regex pattern to match each address with: strings that include ST, RD, or ROAD
+pattern <- "(ST|RD|ROAD)"
+
+# Defines a data table 'LeftOvers' that pipes in the Addresses table and returns only cases that do not include ST, RD, or ROAD and do not match the new regex ('APT' or 'UNIT' followed by a space and some digits)
+LeftOvers <- 
+  Addresses %>% 
+  filter( ! grepl(pattern, address),
+          ! grepl(" APT|UNIT [[:digit:]]+$", address)) 
+```
+
+For each set of patterns that you identify, compute the LeftOvers. Examine them visually to find new street endings to add to the pattern, e.g. LANE.
+
+When you have this working on the small sample, use a larger sample and, eventually, the whole data set. It’s practically impossible to find a method that will work perfectly on new data, but do the best you can.
+
+**Your turn:** In your report, implement your method and explain how it works, line by line. Present your result: how many addresses there are of each kind of road word.
+```{r}
+# pattern chosen by Wikipedia: Street Suffix definitions and investigation of 'LeftOvers' table
+streets <- "(RD|ST|DR|CT|LN|AVE|WAY|PLACE|CIRCLE|HILL|PARK|BLVD|RUN|PT|PKWY|TRAIL|ALLEY|COVE|TERRACE|LOOP|MANOR|FERRY|WOODS|HWY$|PATH|HEIGHTS|SQUARE|WYND)"
+# exclude: Pattern that matches non-street, to exclude from data table
+exclude <- "(PO |BOX|APT|UNIT [[:digit:]]+$|ROOM)"
+
+#Fixed street misspellings and consolidate common abbreviations to get accurate road-related term counts
+FixedAddresses <- Addresses %>% 
+    mutate( address=gsub("BLV$","BLVD",address),
+            address=gsub("LA |LA$","LN",address),
+            address=gsub("LANE","LN",address),
+            address=gsub("PL |PL$","PLACE",address),
+            address=gsub("TER |TER$","TERRACE",address),
+            address=gsub("CIR","CIRCLE",address),
+            address=gsub("AVENUE","AVE",address),
+            address=gsub("TR |TR$","TRAIL",address),
+            address=gsub("TRL |TRL$","TRAIL",address),
+            address=gsub("POINT","PT",address),
+            address=gsub("ROAD","RD",address),
+            address=gsub("COURT","CT",address),
+            address=gsub("DRIVE","DR",address),
+            address=gsub("CV","COVE",address))
+
+# Used trial and error by examining this LeftOvers table to decide what to add to the regex pattern defined above ("streets")
+LeftOvers <- FixedAddresses %>%
+    filter(! grepl(streets, address),
+           ! grepl(exclude,address))
+
+# Finds all cases that match the regex pattern ("streets") defined above, exluding those that match the pattern ("exclude") defined above
+Matches <- FixedAddresses %>%
+    filter(grepl(streets, address),
+           ! grepl(exclude,address))
+
+# Creates a data table that tallies the number of cases that match each of the patterns defined by the regex pattern ("streets")
+StreetNames <- Matches %>%
+    extractMatches(streets, address, street=1 ) %>%
+    group_by(street) %>% 
+    summarise( total=n() ) %>%
+    arrange( desc(total) )
+
+# Display counts of road-related terms
+StreetNames
+```

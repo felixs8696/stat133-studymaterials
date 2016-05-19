@@ -1,0 +1,322 @@
+---
+title: "Lab 6"
+author: "Felix Su"
+output: html_document
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab6/Lab-6-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+
+### Conditional Expressions
+
+---
+
+####Instructions
+If-else statements are perhaps the simplest type of control flow structure:
+
+```{r}
+x <- 1 # Change this value to check if your code works
+x <- -1
+if (x > 0) {
+  print("positive")
+} else {
+  print("not positive")
+}
+```
+
+Of course, the else is not necessary (if you don't want anything to occur otherwise), or you can chain multiple if-else statements:
+
+```{r}
+y <- 1 # Change this value to check if your code works
+y <- 0
+if (y > 0) {
+  print("positive")
+} else if (y < 0) {
+  print("negative")
+} else {
+  print("zero?")
+}
+```
+
+---
+
+####My Answers
+__Your turn!__
+Write R code that will "squish" a number into the interval [0, 100], so that a number less than 0 is replaced by 0 and a number greater than 100 is replaced by 100.
+
+```{r}
+z <- 100*pi
+# Fill in the following if-else statements. You may (or may not) have to add or subtract else if or else statements.
+if (z < 0) { # Replace TRUE with a condition.
+  z <- 0
+}
+# Note: else if is not needed, because the two if statements are mutually exclusive
+if (z > 100) { # Replace TRUE with a condition.
+  z <- 100
+}
+print(z)
+```
+
+## Loops
+
+---
+
+####Instructions
+Loops are used when you want to perform a given task many times.
+
+The simplest type of loop in R is the repeat loop, which will repeatedly evaluate a set of expressions until it is told to stop.
+
+```{r}
+# Divide a number by 2 until it becomes odd.
+# val_rep <- 898128000 # Change this value!
+val_rep <- 1000
+repeat {
+  print(val_rep)
+  if (val_rep %% 2 == 1) { # If val_rep is odd,
+    break                  # end the loop.
+  }
+  val_rep <- val_rep / 2 # Divide val_rep by 2 since val_rep was even.
+  # When the end of the loop is reached, return to the beginning of the loop.
+}
+```
+
+Often you will want to perform a loop until some condition is satisfied, or as long as a condition as satisfied. In that case, a while loop may be more appropriate.
+
+```{r}
+# val_while <- 898128000 # Change this value!
+val_while <- 1000
+while (val_while %% 2 == 0) { # Continue the loop as long as val_while is even.
+  print(val_while)
+  val_while <- val_while / 2
+}
+print(val_while)
+```
+
+Notice that the while loop code is more compact (ignoring the print statements), since the stopping condition has been encoded in the loop itself.
+
+---
+
+####My Answers
+
+__Your turn!__
+Write R code which multiplies a positive number by 3 and adds 1 until the result is greater than 10000. For example, 2015 $\to$ 6046 $\to$ 18139. Write both a repeat loop and a while loop.
+
+```{r}
+n_rep <- 314 # Play with this value! Does your code behave as expected? - Yes
+# n_rep <- 10
+# n_rep <- 10001
+repeat {
+  # if (n_rep <= 0 ) {
+  #   print("Input must be a whole number > 0")
+  #   break
+  # }
+  n_rep <- n_rep * 3 + 1
+  if(n_rep > 10000) break # Replace this with your code.
+}
+print(n_rep)
+```
+```{r}
+n_while <- 314 # Play with this value! Does your code behave as expected? - Yes
+# n_rep <- 10
+# n_while <- 10001
+while (n_while < 10000) { # Replace FALSE with your stopping condition.
+  # if (n_rep <= 0 ) {
+  #   print("Input must be a whole number > 0")
+  #   break
+  # }
+  n_while <- n_while * 3 + 1 # Fill in.
+}
+print(n_while)
+```
+
+---
+
+####Instructions
+Sometimes instead of performing an action until a condition is satisfied, you just want to perform it a specified number of times. In these cases, a for loop is appropriate.
+
+```{r}
+for (i in 1:10) { # Repeat 10 times.
+  print("Hello world!")
+}
+```
+```{r}
+for (i in 1:10) { # Repeat 10 times.
+  print(i+1)
+}
+```
+
+---
+
+####My Answers
+__Your turn again!__
+Write a for loop to add 1 to every element of a vector in place. In other words, at the end of the operation `vec` should change from (3, 1, 4) to (4, 2, 5).
+
+```{r}
+# vec <- c(3, 1, 4) # Change this value!
+vec <- c(1, 2, 3, 4, 5)
+for (j in 1:length(vec)) { # Replace c() with an appropriate sequence.
+  vec[j] <- vec[j] + 1# Fill in.
+}
+print(vec)
+```
+
+## Writing Functions
+
+### Basic Functions, with Control Flow Structures
+
+---
+
+####Instructions
+Often you will find that it is easier to begin writing code for a specific task, with specific variables, before generalizing the code into a function. In the example above, we saw the following code, which divides a positive integer by 2 until it becomes odd.
+
+```{r}
+x <- 898128000 # Example value
+while (x %% 2 == 0) {
+  print(x)
+  x <- x / 2
+}
+print(x)
+```
+
+---
+
+####My Answers
+__Your turn!__
+Now generalize the above code to create a function which performs the same operation without printing the intermediate steps. (You should change very little.)
+
+```{r}
+reduce <- function(x) {
+  # Fill in.
+  while (x %% 2 == 0) {
+    x <- x / 2
+  }
+  print(x)
+}
+reduce(898128000)
+```
+
+How about something a little bit more complicated? Write a function ```f``` which, given a positive integer ```n```, returns ```n / 2``` if ```n``` was even or ```3 * n + 1``` if ```n``` was odd.
+
+```{r}
+f <- function(n) {
+  # Fill in.
+  if(n %% 2 == 0) return(n/2)
+  else return(3 * n + 1)
+}
+
+f(6)        # Should return 3
+f(19)       # Should return 58
+f(27)       # Should return 82
+```
+
+Now create function ```g``` which applies ```f()``` to a positive integer ```n``` until it becomes 1, and returns the number of iterations until this occurs.
+
+```{r}
+g <- function(n) {
+  # Fill in.
+  count <- 0
+  while(n != 1) {
+    n <- f(n)
+    count <- count + 1
+  }
+  return(count)
+}
+
+g(6)        # Should return 8
+g(19)       # Should return 20
+g(27)       # Should return 111
+```
+
+If you didn't earlier, try also writing the same function, but now create ```f()``` as a nested function.  If you did, write the same function but without ```f()``` as a nested function.
+
+```{r}
+h <- function(n) {
+  f <- function(m) {
+    # Fill in.
+    if(m %% 2 == 0) return(m/2)
+    else return(3 * m + 1)
+  }
+  # Fill in.
+  count <- 0
+  while(n != 1) {
+    n <- f(n)
+    count <- count + 1
+  }
+  return(count)
+}
+
+h(6)        # Should return 8
+h(19)       # Should return 20
+h(27)       # Should return 111
+```
+
+### Default Arguments
+
+---
+
+####Instructions
+As you probably know by now, many functions come with default arguments, which can be left unspecified without affecting the execution of the function.
+
+The following function attempts to compute the length of the hypotenuse of a right triangle, but will accept one or two leg lengths.
+
+```{r}
+pythagoras <- function(a, b = a) {
+  return(sqrt(a^2 + b^2))
+}
+
+pythagoras(3, 4)
+pythagoras(5)
+```
+
+---
+
+####My Answers
+__Your turn!__
+Write a function which adds together the elements of a vector raised to a certain power. Use a loop instead of vectorized operations. Include two arguments: ```vec``` and ```pow```. Give ```pow``` a default value of 2.
+
+```{r}
+# Remove eval = FALSE or set eval = TRUE when you have completed this function.
+powersum <- function(vec, pow = 2) { # Fill in arguments.
+  # Fill in.
+  sum <- 0
+  for(n in vec) sum <- sum + n^pow
+  return(sum)
+}
+
+powersum(1:5)       # Should return 55.
+powersum(1:5, 4)    # Should return 979.
+```
+
+### Extra:
+
+If you have time you can get started on your first homework problem:
+
+Write a function that takes a number year and returns a logical value which is either `TRUE`, if the year was or will be a leap year, or `FALSE` if not. The rule for determining leap years is that one of the following conditions must hold:
+
+1. the year is divisible by 4 but not divisible by 100, or 
+
+2. the year is divisible by 400.
+
+```{r}
+leapYear <- function(year) {
+    return((year%%4 == 0 & year %% 100 != 0) | year%%400 == 0)
+}
+```
+
+Now write an R expression using your function to calculate how many leap years you have lived through during your lifetime.
+```{r}
+# Note: Includes leap year for 2016 assuming that this is graded on or after February 29th this year.
+count <- 0
+for(i in 1996:2016) {
+  if (leapYear(i)) count <- count + 1
+}
+print(count)
+```

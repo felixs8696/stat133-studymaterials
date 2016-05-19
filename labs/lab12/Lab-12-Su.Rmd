@@ -1,0 +1,78 @@
+---
+title: "Lab 12"
+author: "Felix Su"
+date: "April 22, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/labs/lab12/Lab-12-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+##1. CarRegistrations
+```{r, eval=FALSE}
+# plate: Start with 3 or 8, O or Q, S or 8
+# zip: Start with 931
+CarRegistrations %>%
+	filter(grepl("[38][OQ][S8].",plate)&&grepl("931.",zip))
+```
+
+##2. Crossword Dictionary
+```{r, eval=FALSE}
+# Regex for 4-down:
+"^s.i..$"
+# Filter for 22-across
+CrosswordDictionary %>%
+  filter(grepl("^g...h$",word)&&definition=="grind one's teeth")
+```
+
+##3. Match English Regex
+1. 3 Ordinary English Phrases
+    * "Get me a b."
+    * "Get me a p."
+    * "Get me a u."
+2. What part of the phrase would be extracted?
+    * The middle portion described by `([a-zA-z]+)` will be extracted.
+
+##7. Somelines
+`cat somelines | sort | uniq | wc -l`
+
+**ANS:** Returns the number of unique lines in the file
+
+##8. Newdata.csv
+`cat data.csv | grep "California" | cut -d "," -f 3-7 > newdata.csv`
+
+**ANS:** newdata.csv would contain only columns 3 and 7, delimited by commas and only rows that contain the string "California"
+
+##9. Meta Characters
+**ANS:** 
+
+* +: Repeat one or more times
+* *: Repeat zero or one time
+* ?: Repeat zero or more times
+
+##10. Match "d?s*[mn]$"
+
+**ANS:**
+
+Phrases that match `d?s*[mn]$`:
+
+* dddsn
+* adsm
+* dm
+* ssn
+* dsmn
+
+##11. Problem with Regex
+Problem with `gsub(pattern="<.*>",replacement="", x=text)`
+
+**ANS:** The regex should contain the star and ends with indicators, which would make it `^<.*>$`

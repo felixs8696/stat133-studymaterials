@@ -1,0 +1,791 @@
+---
+title: "midterm review solution"
+author: "stat 133"
+date: ""
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- Don't edit the material above this line -->
+
+##Announcement
+
+Here are review problems for Midterm 1 **in class on Wednesday March 16**. This material covers the first 14 chapters of the book (excluding chapter 13) and data camp courses Introduction to R, Intermediate R (chapters 1-4), Data Visualization with ggplot2 (1) (chapters 1-4).  
+
+If you can do these problems you should be fine on the exam. If you want more practice problems I would redo the i-clicker quesitons on b-courses next. 
+
+I suggest you write out your solutions long hand with pencil and paper since this is what you will be doing on the exam.
+
+These questions are due for extra credit Saturday night March 12 at 10pm. For extra credit upload a picture of your solutions to b-courses. It doesn't have to be a great picture. You will be graded entirely for effort. An honest attempt will get 100%. I will give you solutions Saturday night at 10pm. 
+
+We will review as a class on Monday March 14. To make an efficient review, I will ask you to post which review questions you are confused about on a discussion board on b-courses.
+
+You are allowed single sided 8.5x11in  **cheat cheat** on the exam. The cheat sheet can only include syntax for R commands from the follwoing allowable resources:
+
+1. Anything you get from the lecture notes or textbook or data camp
+
+2. Anything you get from the R code book (for example `?left_join()`)
+
+3. [ggplot2 help](http://docs.ggplot2.org/current/).
+
+4. [ggplot2 cheat sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+
+Good luck!!
+
+# 1.
+
+This wrangling sequence on BabyNames will produce a short table
+as output.
+
+```{r, eval=FALSE}
+BabyNames %>%
+  group_by(name) %>%
+  summarise(tot = sum(count)) %>%
+  mutate(rank = rank(desc(tot))) %>%
+  filter(name == "Fernando")
+
+```
+
+**Solution**
+
+The first two statements compute the total count of each name.
+Case is a name. The third statement adds a variable rank which contains the ranked place among the names from most popular to least popular. Last, the single case for “Fernando” is extracted.
+In effect, the command finds the total count and popularity rank for the name “Fernando”.
+
+# 2. 
+
+The WorkoutLog data table lists the duration and activity type of
+each day’s workout for the members of a rowing crew team. The variables are :
+
+* number the team member’s jersey number
+
+* activity giving the kind of activity, e.g. weight, sprints, etc., • date when the activity occurred
+
+* duration of the activity in minutes
+
+Consider the following data wrangling sequence:
+
+```{r, eval=FALSE}
+WorkoutLog %>%
+group_by(jersey) %>%
+summarise(tot = sum(duration, na.rm = TRUE)) %>% filter(activity == "sprints")
+
+```
+
+The sequence generates an error: Error: unknown column 'jersey' What went wrong? How can it be fixed?
+
+**Solution**
+
+There is no variable named jersey. To fix it, change jersey to
+number.
+
+
+# 3.
+
+A wrangling sequence in this form,
+
+```{r, eval=FALSE}
+InputData %>%
+group_by(???) %>%
+summarise(high = max(income), low = min(income))
+
+```
+
+produces an output that starts this way:
+
+```{r,echo=FALSE}
+df <-  data.frame(location=c("DC","MN","CA"), sex=c("F","M","M"), month=c("Aug","Nov","Oct"), low=c("mid","high","high"), high=c("poverty","poverty","low"))
+df
+```
+
+1. What variable or variables are in the place marked by `???` ?
+
+2. Describe the income variable in as much detail as the information
+provided allows.
+
+**Solution**
+
+The grouping variables are location, sex, and month. The output
+of a `summarise()` operation always contains the grouping variables and any variables created within the `summarise()`.
+income is a categorical variable with levels high, low, mid, poverty. When operating on a categorical variable, `min()` and `max()` examine the levels alphabetically, returning respectively the first and last in _alphabetical_ order.
+
+# 4.
+
+Recall the `BabyNames` data that tells how many babies of each sex were given each name, like this:
+
+```{r echo=FALSE, total_rows=nrow(BabyNames)}
+BabyNames %>% 
+  filter(name == "Francis", 
+         year %in% c(1920, 2012), 
+         count %in% c(654,429))
+```
+
+In the entire data table, there are almost 2 million rows of this sort covering 134 years from 1880 onward.
+
+For each of the following, separately, write the wrangling statements to create a new data table
+
+1. containing only the years on or after 2000.
+#. containing only those year/names with at least 20 babies for boys and girls combined.
+#. Extract out only those names which appear in at least 120 years out of the 134 year time span.
+
+**Solution**
+
+Part 1.
+```{r display_rows=1}
+BabyNames %>%
+  filter(year >= 2012) %>%
+  head(2)
+```
+
+Part 2.
+
+```{r display_rows=1}
+BabyNames %>%
+  group_by(name, year) %>%
+  summarise(babies = sum(count)) %>%
+  filter(babies >= 20) %>%
+  head(2)
+```
+
+```{r display_rows=1}
+BabyNames %>% 
+  group_by(name) %>%
+  summarise(year_count = n_distinct(year)) %>%
+  filter(year_count >= 120) %>% 
+  head(2)
+```
+
+
+
+# 5
+
+Consider this plot made with `geom_density()` 
+
+
+
+```{r include=FALSE}
+p <-
+  ggplot(mosaicData::TenMileRace, aes(x = net)) +
+  geom_density(alpha=0.5, color=NA, aes(fill = sex)) +
+  xlab("Running time (s)") +
+  scale_fill_grey() +
+  theme(panel.background = element_rect(fill='white', colour='black'))
+```
+
+```{r fig.margin = TRUE, echo=FALSE}
+p
+```
+
+
+What do the glyph-ready data look like? That is, 
+
+* What are the variables? 
+* Are they quantitative or categorical? 
+* What are the levels for any categorical variable.  
+* Is it likely that there are 10 or fewer cases?
+
+
+**Solution**
+
+Just two variables
+
+* running time --- quantitative
+* sex --- categorical with levels F and M
+* There are many cases.
+
+Here is the ggplot commands to make the graph in case you are curious.
+```{r eval=FALSE}
+  ggplot(mosaicData::TenMileRace, aes(x = net)) +
+  geom_density(alpha=0.5, color=NA, aes(fill = sex)) +
+  xlab("Running time (s)") +
+  scale_fill_grey() +
+  theme(panel.background = element_rect(fill='white', colour='black'))
+```
+
+# 6
+
+Consider this plot made with `geom_boxplot()` ...
+
+```{r include=FALSE}
+p <-
+  mosaicData::TenMileRace %>%
+  filter(age >= 20) %>%
+  mutate(Age = cut(age, seq(20, 90, by = 10))) %>%
+  na.omit() %>%
+  ggplot(aes(x = Age, y = net)) +
+  geom_boxplot(outlier.colour = NA, aes(color=sex, fill=sex, position="dodge")) +
+  ylab("Running time (s)") +
+  scale_fill_grey()  + scale_color_grey() +
+  theme(panel.background = element_rect(fill = 'white', colour = 'black'))
+```
+
+```{r echo=FALSE}
+p
+```
+
+1. Do the glyphs represent individual cases or cases taken collectively (a.k.a. a "statistic")?
+2. What do the glyph-ready data look like? That is,     
+    a. What are the variables? 
+    #. Are they quantitative or categorical? 
+    #. What are the levels for any categorical variable.
+    #. Is it likely that there are 20 or fewer cases?
+
+**Solution**
+
+Three variables
+
+* running time --- quantitative
+* Age --- categorical with levels `(20,30]`, `(30,40]` and so on
+* sex --- categorical with levels F and M
+* Each box-and-whisker glyph involves at least two cases (and typically many more than that).  There are 12 box-and-whisker glyphs, so there are at least 24 cases.
+
+# 7
+
+The data table gives the individual first-choice ballots for the Minneapolis 2013 mayoral election.
+
+```{r echo=FALSE, total_rows=nrow(Minneapolis2013)}
+set.seed(101)
+Minneapolis2013 %>%
+  select(Precinct, Ward, First) %>%
+  filter(First != "undervote") %>% 
+  head(4)
+```
+
+The long, capitalized names for candidates are driving you crazy.  You want to convert them, for all `r nrow(Minneapolis2013)` cases, to shorten them to be the first name and last initial, e.g. "Betsy H", "Bob F", "Kurtis H".  You can do this using the `inner_join()` verb and an auxiliary data table like this:
+
+```{r echo=FALSE, display_rows=3, title="Auxiliary Table"}
+foo <- data.frame(variable1=c("BETSY HODGES", "CAM WINTON", "DON SAMUELS", rep("",36)), 
+                          variable2=c("Betsy H", "Cam W", "Don S", rep("",36)))
+goo <- foo
+goo$variable2 = "."
+goo %>% head(5)
+```
+
+
+* Fill in values for `Variable2` in a way appropriate for the task.
+* What are the appropriate arguments to `inner_join()`
+
+**Solution**
+
+* The auxiliary table will translate between the names as given in the ballot data and the names as you would like to see them.
+
+```{r echo=FALSE}
+foo
+```
+
+The names `variable1` and `variable2` might be made more descriptive, e.g. `full_name` and `short_name`.
+
+* `inner_join()` have the ballot data table and the auxiliary data table as the first two inputs. You'll also need to specify which variables are to be used to perform the case matching, `by = c("First", "variable2")`.  Note: In a statement like `Ballots %>% inner_join(Aux, by=c("First", "variable2"))`, `Ballots` is the first argument to `inner_join()` and `Aux` is the second argument.
+
+# 8
+
+You have been given a newspaper report of the political party affiliations of each candidate, like this:
+
+> *DFL* candidates Betsy Hodges, Mark Andrew, Bob Fine, and Don Samuels faced *Independent* Cam Winton and *Libertarian* candidates Chrisopher Zimmerman and Christopher Clark.
+
+Given this information in this form along with data in this format:
+
+```{r echo=FALSE, total_rows=nrow(Minneapolis2013)}
+set.seed(105)
+Minneapolis2013 %>%
+  select(Precinct, Ward, First) %>%
+  rename(Candidate = First) %>% 
+  filter(Candidate != "undervote") %>% 
+  sample_n(size = 4)
+```
+
+Describe in words how you would go about calculating the vote for each party in each precinct.
+
+**Solution**
+
+* First: Create a data table translating between candidate and party
+
+Candidate | Party
+----------|-------
+BETSY HODGES | DFL
+CAM WINTON | Independent
+
+* Second: Join this with the ballot data
+* Third: group by precinct and party, summarising with a count of the number of ballots in each group.
+
+# 9
+
+The data table `BodyTypes` gives the responses of 24,117 women and 35,829 men who are members of OkCupid to a question about their "body type".  The numbers are the counts of people giving listing that `body_type`.
+
+```{r eval=FALSE}
+Types <- read.csv("/Users/Adam/Desktop/stat133lectures_hw_lab/exam/practice/BodyTypes.csv", stringsAsFactors = FALSE)
+arrange(Types, desc(f))
+```
+
+Write a wrangling statement to find the proportion of women with each body type.  Call this variable `fprop`. Similarly, calculate `mprop`, the proportion of men with each body type, and `ratio`, the ratio of the women's proportion to the men's.  Finally, create a data table arranged in order from most unbalanced to most balanced. (Hint for the last step: `pmax()` will compare two variables, case by case, returning the maximum quantity of the two for each case.) 
+
+**Solution**
+
+```{r eval=FALSE}
+Types %>% 
+  mutate(fprop = f / n(), mprop = m / n(), ratio = fprop / mprop) %>%
+  arrange(desc(pmax(fprop / mprop, mprop / fprop)))
+```
+
+Another way to accomplish the last step, if you're happy using logarithms,  is `arrange(desc(abs(log(fprop/mprop))))`.
+
+# 10
+
+The following was written to find the top 3 candidates in the Minneapolis 2013 mayoral election. There are a few mistakes or omissions in the statement.  Circle them and indicate how to fix them.
+
+```{r eval=FALSE}
+Result <-
+  Minneapolis2013 %>%
+  group_by(First)
+  summarise(total_votes == sum(First)) %>%
+  arrange(total_votes) %>%
+  head(3)
+```
+**Solution**
+
+* Line 3, `group_by(First)` should be `group_by(First) %>%` (missing `%>%` in the original)
+* Line 4, `total_votes == sum(First)` should be `total_votes = n()` (two mistakes)
+* Line 5, `arrange(total_votes)` should be `arrange(desc(total_votes))`
+
+
+# 11
+
+(a) Suppose $x_0 =1$ and $x1 =2$ and
+\[
+   x_j = x_{j−1}+ 2 \text{ for } j=1,2,....
+\]
+Write a function `testLoop` which takes the single argument `n` and returns the first n − 1 (assume n is larger than 3) values of the
+sequence $\{x_j\}_{j≥0}$: that means the values of $x_0, x_1, x_2, . . . , x_{n−2}$.
+```{r,echo=FALSE}
+testLoop <- function(n)
+    {
+        xVec <- rep(NA, n-1)
+        xVec[1] <- 1
+        xVec[2] <- 2
+        for( j in 3:(n-1) )
+          xVec[j] <- xVec[j-1] + 2/xVec[j-1]
+        return(xVec)
+}
+```
+(b) Assume we have already built a dataframe below:
+```{r,echo=TRUE}
+tmp <- as.data.frame(cbind(1:499,testLoop(500)))
+colnames(tmp) <- c("n","result")
+```
+Try to use ggplot to plot the result like below: 
+```{r,echo=FALSE}
+ggplot(data = tmp,aes(x = n, y = result))+geom_point()+geom_smooth(se = FALSE)
+```
+
+***Solution**
+a)
+```{r,eval=FALSE}
+testLoop <- function(n)
+    {
+        xVec <- rep(NA, n-1)
+        xVec[1] <- 1
+        xVec[2] <- 2
+        for( j in 3:(n-1) )
+          xVec[j] <- xVec[j-1] + 2/xVec[j-1]
+        return(xVec)
+}
+```
+b)
+
+```{r,eval=FALSE}
+ggplot(data = tmp,aes(x = n, y = result))+geom_point()+geom_smooth(se = FALSE)
+```
+
+#12
+
+Suppose we have a dataframe called `data` like below:
+```{r,eval=FALSE}
+site	transect	fish_abund	dN15_SG
+B      	3	          19	      15.22
+A	      1	          4	        10.35
+A	      2	          12	      9.06
+B	      1	          13	      14.72
+A	      2	          5	        8.99
+B	      1	          18       	14.17
+B	      2	          25	      15.66
+C	      1	          0	        11.42
+A	      1	          5	        11.35
+C	      3	          4	        10.83
+C	      2	          4	         9.97
+A	      3	          6	        8.58
+C	      2	          8	        11.74
+B	      3	          18	      16.53
+```
+Write the code to get the result like below:
+
+```{r,echo=FALSE}
+data <- read.csv("/Users/felixsu/ucb_classes/Sp16/STAT133/ec/dat.csv")
+data %>%
+  filter(transect %in% c("1","3")) %>%
+  mutate(genre = ifelse(transect == "1", "Light","Strong")) %>%
+  group_by(genre) %>%
+  summarise(Sum_dN15_SG = sum(fish_abund))
+```
+
+**Solution**
+
+```{r}
+data <- read.csv("/Users/felixsu/ucb_classes/Sp16/STAT133/ec/dat.csv")
+data %>%
+  filter(transect %in% c("1","3")) %>%
+  mutate(genre = ifelse(transect == "1", "Light","Strong")) %>%
+  group_by(genre) %>%
+  summarise(Sum_dN15_SG = sum(fish_abund))
+```
+
+
+
+
+
+#13
+
+Write a functon `fib` that takes a positive integer `n` and returns the nth Fibonacci number. (In R we start counting from 1 not 0.)
+Fibonacci numbers are as follows: 0, 1, 1, 2, 3, 5, 8. First two Fibonacci numbers are 0 and 1, respectively. Starting from the third one each Fibonacci number is equal to the sum of previous two. In other words `fib(3) = fib(2) + fib(1)` and `fib(4) = fib(3) + fib(2)`
+etc.
+
+
+**Solution**
+```{r}
+fib <- function(n){
+  if (n==1) {
+    return(0)
+  } else if (n==2) {
+    return(1) 
+  } else {
+    count = 3
+    prev1 = 1
+    prev2 = 0
+    while (count<=n) {
+      temp = prev2
+      prev2 = prev1
+      prev1 = prev1 + temp
+      count = count + 1
+    }
+    return(prev1)
+  }
+}
+fib(1)
+fib(2)
+fib(3)
+fib(4)
+fib(5)
+
+```
+
+#14
+
+Suppose following tables are loaded to your computer. You can call them `TableA` and `TableB`, respectively. 
+
+```{r, echo = FALSE}
+Year = c(2000, 2001)
+Algeria = c(7 ,9)
+Brazil = c(12, 14)
+Columbia = c(16, 18)
+
+TableA = data.frame(Year, Algeria, Brazil, Columbia)
+TableA
+
+Country = c("Algeria", "Brazil", "Columbia")
+Abbreviation = c("DZ", "BR", "CO")
+TableB = data.frame(Country, Abbreviation)
+TableB
+```
+
+Write a code to get to the following table. 
+
+```{r, echo = FALSE, warning = FALSE}
+TableC <- TableA %>%
+  gather(key = Country, value = Value, -Year) %>%
+  group_by(Country) %>%
+  summarize(Avg = mean(Value)) %>%
+  left_join(TableB, by = c("Country"= "Country")) %>%
+  select(Abbreviation, Avg)
+
+TableC
+
+```
+
+
+**Solution**
+
+```{r, eval= FALSE, warning = FALSE}
+TableC <- TableA %>%
+  gather(key = Country, value = Value, -Year) %>%
+  group_by(Country) %>%
+  summarize(Avg = mean(Value)) %>%
+  left_join(TableB, by = c("Country"= "Country")) %>%
+  select(Abbreviation, Avg)
+
+TableC
+
+
+```
+
+#15
+
+Using e while and/or a for loop and conditional expression convert `Mat`, matrix of zeros, to an identity matrix. 
+`Mat`
+```{r, echo = FALSE}
+unloadNamespace('printr')
+Mat = matrix(rep(0, times = 25), nrow = 5)
+Mat
+```
+After your code runs `Mat` should look like this. 
+```{r, echo= FALSE}
+unloadNamespace('printr')
+for (i in 1:5) {
+  for (j in 1:5) {
+    if (i==j){
+      Mat[i, j] =1
+    }
+  }
+}
+Mat
+```
+
+
+**Solution**
+```{r, eval = FALSE}
+
+Mat = matrix(rep(0, times = 25), nrow = 5)
+Mat
+```
+After your code runs `Mat` should look like this. 
+```{r, eval= FALSE}
+for (i in 1:5) {
+  for (j in 1:5) {
+    if (i==j){
+      Mat[i, j] =1
+    }
+  }
+}
+Mat
+```
+
+# 16
+
+Given vector 'asc=1:50', answer the following questions:  
+1. use 'asc' and for loop to generate a new vector called 'desc' which is the reverse of 'asc'.  
+2. use 'asc', for loop and while loop to update 'asc' so as it contains value c(1:25,25:1).  
+3. use 'asc', for loop and if/else statement to update 'asc' to c(1,1,2,2,3,3......,24,24,25,25)  
+
+**Solution**
+```{r}
+asc = 1:50
+#1.
+desc=numeric(50)
+for (i in 1:length(asc)){
+  desc[i] = asc[51-i]
+}
+#2.
+for (i in 1:length(asc)){
+  while (asc[i]>25){
+    asc[i] = 51-asc[i]
+  }
+}
+#3.
+for (i in 1:length(asc)){
+  if(asc[i] %% 2 == 0){
+    asc[i] = asc[i]/2
+  }else if(asc[i]%%2 ==1){
+    asc[i] = (asc[i]+1)/2
+  }
+}
+```
+
+#17
+
+Split the a character string `University of California` into a vector of signle characters and calculate the number of `i` in it.
+
+**Solutions**
+```{r}
+split_chars <- function(n) {
+  chars <- unlist(strsplit(n,""))
+  return(chars)
+}
+
+char <- split_chars("University of California")
+char
+
+count <- 0
+for (i in 1:length(char)) {
+  if (char[i] == "i") {
+    count <- count + 1 
+  }
+}
+count
+
+```
+
+#18
+
+Change data from wide to narrow format using gather function. Group Ozone, Solar.R, Wind, Temp into one variable called `type` and create another column called `value` to store their values. 
+```{r}
+# built-in dataset in R
+head(airquality)
+```
+
+**Solutions**
+```{r}
+narrow_airquality <- airquality %>% gather(type, value, Ozone:Temp)
+head(narrow_airquality) 
+```
+
+#19
+
+```{r, echo = F}
+AttachDocument <- function(...){
+  # Description
+  #   Attaches files in knitr document as a link
+  # Arguments:
+  #   ... - strings, absolute or relative paths to files to be included
+  # Value:
+  #   Links in the knitted document that open the attached files
+  user.name <- Sys.getenv("USERNAME")
+  user.home <- Sys.getenv("HOME")
+  tooltip <- paste("File Origin: User", user.name, "at", user.home)
+  
+  Attach <- function(file) {
+    if (!file.exists(file)) 
+      stop(sprintf("File '%s' doesn't exist.", file))
+    
+    encoded.file <- base64enc::dataURI(file = file, 
+                                       mime = mime::guess_type(file))
+    link <- "<a href='%s' target='_blank' title='%s' download='%s'> &#8658; '%s'</a>"
+    sprintf(link, encoded.file, tooltip, basename(file), file)
+  }
+  
+  files <- unlist(list(...))
+  
+  # Default file is the current document
+  if (length(files) == 0)
+    files <- knitr::current_input()
+  
+  for (F in files) {
+    cat(Attach(F))
+  }
+}
+```
+
+```{r data, echo = F, results = 'hide'}
+# Data frame for questions
+data <- data.frame(V1 = rep(c("a","b","c"), each = 2),
+                   V2 = rep(c(1:2), times = 3),
+                   V3 = rep(c("alpha", "beta", "gamma")),
+                   V4 = seq(10, 60, by = 10))
+print(data)
+```
+
+
+
+
+
+Suppose you have a data frame, `data`, as given below:
+```{r ref.label = 'data', echo = F}
+```
+Assuming that the `tidyr` and `dplyr` libraries are already loaded, write down what the output for the following code.  The final result is enough for full credit, but partial credit will be given for writing out and labelling intermediate steps.
+```{r SQ1, results = 'hide'}
+data %>%
+  filter(V1 == "a") %>% # Step 1
+  select(V2, V4) %>% # Step 2
+  gather(key = Apple, value = Banana, V2, V4) %>% # Step 3
+  mutate(Apple = Banana) # Step 4
+```
+
+**Solution**
+```{r ref.label = 'SQ1', echo = F}
+```
+
+#20
+
+Suppose you have a data frame, `data`, as given below.
+
+a) Write a function called `fix_missing_99` that takes one argument: `x`, a numeric vector.  The function should replace every component of `x` equal to -99 with `NA`.
+b) Write a loop that replaces every -99 in `data` with `NA`.  For full credit, your code must use the function in part (a) and it should continue to work without modification if additional columns are added to the data frame.
+c) Write down an appropriate call from the `apply` family of functionals to perform the same task as in part (b).
+```{r data2, echo = F}
+set.seed(1014)
+data <- data.frame(replicate(6, sample(c(1:10, -99), 6, rep = TRUE)))
+names(data) <- letters[1:6]
+data
+```
+**Solution**
+
+Part (a)
+```{r}
+fix_missing_99 <- function(x) {
+  x[x == -99] <- NA
+  return(x)
+}
+```
+
+Part (b)
+```{r}
+for(name in names(data)) {
+  data[name] <- fix_missing_99(data[name])
+}
+```
+
+Part (c)
+```{r}
+data[] <- lapply(data, fix_missing_99)
+```
+
+#21
+
+Given the plot below,
+
+```{r echo=FALSE,fig.height=3,fig.width=6}
+diamonds %>% ggplot(aes(x=carat,y=price))+geom_point(aes(col=cut))+geom_smooth(se=FALSE)+facet_wrap(~cut)+labs(title = "carat vs price")+theme(plot.title=element_text(size=20))
+```
+
+assuming the 'ggplot2' is already loaded and the first 6 rows of the 'diamond' dataset are: 
+```{r echo=FALSE}
+head(diamonds)
+```
+What command in 'ggplot' that you will use to generate this designated graph? 
+
+**Solution**
+```{r eval=FALSE}
+diamonds %>% ggplot(aes(x=carat,y=price))+geom_point(aes(col=cut))+geom_smooth(se=FALSE)+facet_grid(.~cut)+labs(title = "carat vs price")+theme(plot.title=element_text(size=20))
+```
+
+#22
+
+```{r}
+temp <-  list(c(3,7,9,6,-1),c(6,9,12,13,5), c(4,8,3,-1,-3), c(1,4,7,2,-2),c(5,7,9,4,2))
+temp
+```
+
+1. Create a function that returns all values below zero. Call the function belowZero
+
+2. Apply belowZero over temp using `sapply()`. Call the result freezingS
+
+**Solution**
+a)
+```{r}
+belowZero <- function(vec){
+    return(vec[vec<0]) 
+}
+```
+b)
+```{r}
+freezingS <- temp %>% sapply(belowZero)
+```
+

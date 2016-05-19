@@ -1,0 +1,65 @@
+---
+title: "Assignment 5"
+author: "Felix Su"
+date: "February 18, 2016"
+output: 
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(printr)
+load("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw5/ScorecardSmall.Rda")
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments("/Users/felixsu/ucb_classes/Sp16/STAT133/hw/hw5/Assignment-Five-Su.Rmd")
+```
+<!-- Don't edit the material above this line -->
+
+
+1. Select just variables you need from Scorecard data
+```{r}
+MyScorecard <- ScorecardSmall %>% 
+  select(CONTROL, ADM_RATE, CCSIZSET, NPT41_PUB, NPT43_PUB, NPT45_PUB, NPT41_PRIV, NPT43_PRIV, NPT45_PRIV) %>%
+  filter(CONTROL != 3, !(CCSIZSET %in% c(1, 6, 7, 8)), !is.na(CCSIZSET))
+
+MyScorecard %>% head()
+```
+
+2. Use gather to convert from wide to narrow format
+```{r}
+NarrowCard <- MyScorecard %>%
+  gather(key = Quintile, value = Net_cost, NPT41_PUB, NPT43_PUB, NPT45_PUB, NPT41_PRIV, NPT43_PRIV, NPT45_PRIV) %>%
+  filter(!is.na(Net_cost), !is.na(ADM_RATE))
+
+NarrowCard %>% head()
+```
+
+3. Translate NPT items to short names
+```{r}
+NPT_names <- read.csv("http://tiny.cc/dcf/NPT4-names.csv")
+CONTROL <- c(1,2)
+pub_priv <- c("Public", "Private")
+control_names <- data.frame(CONTROL, pub_priv)
+MyCard <- NarrowCard %>%
+  left_join(NPT_names, by=c("Quintile" = "long_name")) %>%
+  left_join(control_names, by=c("CONTROL" = "CONTROL")) %>%
+  transform(ncost_1000 = Net_cost/1000)
+MyCard %>% head()
+```
+
+4. Plot the newly wrangled Scorecard
+```{r fig.height=4, fig.width=6}
+ggplot(MyCard, aes(x = ADM_RATE, y = ncost_1000)) +
+  geom_point(color = "blue", alpha = .4) +
+  facet_grid(pub_priv ~ short_name) +
+  xlab("Admission Rate, %") +
+  ylab("Net cost per year, $'000") +
+  scale_x_continuous(labels = scales::percent) +
+  geom_smooth(color = "red", fill="red") +
+  ggtitle("Score Card")
+```
